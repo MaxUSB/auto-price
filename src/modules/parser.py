@@ -46,36 +46,50 @@ class Parser:
                 response = requests.post(url=self.url, json=request_parameter, headers=header)
                 if response.status_code == 200:
                     cars = response.json()['offers']
-                    try:
-                        for car in cars:
-                            car_dict = {
-                                'ID': car['id'],
-                                'Color': car['color_hex'],
-                                'Owners': car['documents']['owners_number'],
-                                'IsOriginalPts': car['documents']['pts_original'],
-                                'Year': car['documents']['year'],
-                                'YearTax': car['owner_expenses']['transport_tax']['tax_by_year'],
-                                'Price': car['price_info']['price'],
-                                'City': car['seller']['location']['region_info']['name'],
-                                'Mileage': car['state']['mileage'],
-                                'IsNotBeaten': car['state']['state_not_beaten'],
-                                'Mark': car['vehicle_info']['mark_info']['name'],
-                                'IsLeftHand': car['vehicle_info']['steering_wheel'] == 'LEFT',
-                                'HP': car['vehicle_info']['tech_param']['power'],
-                                'Capacity': car['vehicle_info']['tech_param']['displacement'],
-                                'Transmission': car['vehicle_info']['tech_param']['transmission'],
-                                'FuelType': car['vehicle_info']['tech_param']['engine_type'],
-                                'GearType': car['vehicle_info']['tech_param']['gear_type'],
-                                'BodyType': car['vehicle_info']['configuration']['body_type'],
-                            }
-                            parsed_cars.append(car_dict)
-                    except KeyError as error:
-                        print(f'\nerror: on page {page} {error}')
+                    for car in cars:
+                        car_dict = {}
+                        try: car_dict['ID'] = car['id']
+                        except: car_dict['ID'] = None
+                        try: car_dict['Color'] = car['color_hex']
+                        except: car_dict['Color'] = None
+                        try: car_dict['Owners'] = car['documents']['owners_number']
+                        except: car_dict['Owners'] = None
+                        try: car_dict['Pts'] = car['documents']['pts']
+                        except: car_dict['Pts'] = None
+                        try: car_dict['Year'] = car['documents']['year']
+                        except: car_dict['Year'] = None
+                        try: car_dict['YearTax'] = car['owner_expenses']['transport_tax']['tax_by_year']
+                        except: car_dict['YearTax'] = None
+                        try: car_dict['Price'] = car['price_info']['price']
+                        except: car_dict['Price'] = None
+                        try: car_dict['City'] = car['seller']['location']['region_info']['name']
+                        except: car_dict['City'] = None
+                        try: car_dict['Mileage'] = car['state']['mileage']
+                        except: car_dict['Mileage'] = None
+                        try: car_dict['IsNotBeaten'] = car['state']['state_not_beaten']
+                        except: car_dict['IsNotBeaten'] = None
+                        try: car_dict['Mark'] = car['vehicle_info']['mark_info']['name']
+                        except: car_dict['Mark'] = None
+                        try: car_dict['IsLeftHand'] = car['vehicle_info']['steering_wheel'] == 'LEFT'
+                        except: car_dict['IsLeftHand'] = None
+                        try: car_dict['HP'] = car['vehicle_info']['tech_param']['power']
+                        except: car_dict['HP'] = None
+                        try: car_dict['Capacity'] = car['vehicle_info']['tech_param']['displacement']
+                        except: car_dict['Capacity'] = None
+                        try: car_dict['Transmission'] = car['vehicle_info']['tech_param']['transmission']
+                        except: car_dict['Transmission'] = None
+                        try: car_dict['FuelType'] = car['vehicle_info']['tech_param']['engine_type']
+                        except: car_dict['FuelType'] = None
+                        try: car_dict['GearType'] = car['vehicle_info']['tech_param']['gear_type']
+                        except: car_dict['GearType'] = None
+                        try: car_dict['BodyType'] = car['vehicle_info']['configuration']['body_type']
+                        except: car_dict['BodyType'] = None
+                        parsed_cars.append(car_dict)
                 else:
                     print(f'\nerror: {response.status_code} status for page {page}')
 
             print('done.\nremoving duplicates...', end=' ')
-            parsed_cars_df = pd.DataFrame(parsed_cars)
+            parsed_cars_df = parsed_cars_df.append(parsed_cars)
             parsed_cars_df.drop_duplicates(['ID'], inplace=True)
 
             print('done.\nsaving data...', end=' ')
