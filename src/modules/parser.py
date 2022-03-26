@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 import pandas as pd
 
@@ -45,7 +46,10 @@ class Parser:
                 request_parameter['page'] = page
                 response = requests.post(url=self.url, json=request_parameter, headers=header)
                 if response.status_code == 200:
-                    cars = response.json()['offers']
+                    cars = response.json().get('offers')
+                    if cars is None:
+                        time.sleep(15)
+                        continue
                     for car in cars:
                         car_dict = {}
                         try: car_dict['ID'] = car['id']
@@ -88,11 +92,8 @@ class Parser:
                 else:
                     print(f'\nerror: {response.status_code} status for page {page}')
 
-            print('done.\nremoving duplicates...', end=' ')
-            parsed_cars_df = parsed_cars_df.append(parsed_cars)
-            parsed_cars_df.drop_duplicates(['ID'], inplace=True)
-
             print('done.\nsaving data...', end=' ')
+            parsed_cars_df = parsed_cars_df.append(parsed_cars)
             self.__save_to_csv(parsed_cars_df, 'autoru_learn.csv')
             print('done.')
 
