@@ -94,6 +94,7 @@ class Parser:
 
             print('done.\nsaving data...', end=' ')
             parsed_cars_df = parsed_cars_df.append(parsed_cars)
+            parsed_cars_df.drop_duplicates(['ID', 'Mark'], inplace=True)
             self.__save_to_csv(parsed_cars_df, 'autoru_learn.csv')
             print('done.')
 
