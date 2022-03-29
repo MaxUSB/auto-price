@@ -70,8 +70,6 @@ class Parser:
                         except: car_dict['City'] = None
                         try: car_dict['Mileage'] = car['state']['mileage']
                         except: car_dict['Mileage'] = None
-                        try: car_dict['IsNotBeaten'] = car['state']['state_not_beaten']
-                        except: car_dict['IsNotBeaten'] = None
                         try: car_dict['Mark'] = car['vehicle_info']['mark_info']['name']
                         except: car_dict['Mark'] = None
                         try: car_dict['IsLeftHand'] = car['vehicle_info']['steering_wheel'] == 'LEFT'
@@ -86,8 +84,6 @@ class Parser:
                         except: car_dict['FuelType'] = None
                         try: car_dict['GearType'] = car['vehicle_info']['tech_param']['gear_type']
                         except: car_dict['GearType'] = None
-                        try: car_dict['BodyType'] = car['vehicle_info']['configuration']['body_type']
-                        except: car_dict['BodyType'] = None
                         parsed_cars.append(car_dict)
                 else:
                     print(f'\nerror: {response.status_code} status for page {page}')
@@ -95,6 +91,7 @@ class Parser:
             print('done.\nsaving data...', end=' ')
             parsed_cars_df = parsed_cars_df.append(parsed_cars)
             parsed_cars_df.drop_duplicates(['ID', 'Mark'], inplace=True)
+            parsed_cars_df.drop(columns=['ID'], inplace=True)
             self.__save_to_csv(parsed_cars_df, 'autoru_learn.csv')
             print('done.')
 
