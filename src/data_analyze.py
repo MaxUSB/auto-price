@@ -1,9 +1,12 @@
 import os
+import argparse
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
 
 cars = pd.read_csv(f"{os.getenv('project_path')}/data/autoru_learn.csv")
 separator = '======================================================================================\n' \
@@ -27,7 +30,24 @@ def build_num_feature_plot(x, grid_place):
     plt.xlabel(x)
 
 
-def run():
+def build_compare_plot(prediction, y, model):
+    plt.figure(figsize=(7, 7))
+    plt.title(model)
+    plt.scatter(y, prediction)
+    plt.plot([0, max(y)], [0, max(prediction)])
+    plt.xlabel('Real Price')
+    plt.ylabel('Predicted Price')
+    plt.show()
+
+
+def build_compare_metrics(prediction, y):
+    mse = mean_squared_error(y, prediction)
+    rmse = mean_squared_error(y, prediction, squared=False)
+    r2 = r2_score(y, prediction)
+    return [mse, rmse, r2]
+
+
+def run(only_models_compare=False):
     global cars
 
     print(separator)
@@ -37,52 +57,53 @@ def run():
     cars['YearTax'] = cars['YearTax'].astype(int)
     cars['Owners'] = cars['Owners'].astype(str)
 
-    print(separator)
-    print(f'MARKS (count={len(cars.Mark.unique())})\n', cars.Mark.unique())
+    if not only_models_compare:
+        print(separator)
+        print(f'MARKS (count={len(cars.Mark.unique())})\n', cars.Mark.unique())
 
-    print(separator)
-    print('PRICE PLOTS')
-    plt.figure(figsize=(20, 8))
-    plt.subplot(1, 2, 1)
-    plt.title('Price Distribution')
-    sns.histplot(data=cars.Price, kde=True)
-    plt.subplot(1, 2, 2)
-    plt.title('Price Spread')
-    sns.boxplot(y=cars.Price)
-    plt.show()
+        print(separator)
+        print('PRICE PLOTS')
+        plt.figure(figsize=(20, 8))
+        plt.subplot(1, 2, 1)
+        plt.title('Price Distribution')
+        sns.histplot(data=cars.Price, kde=True)
+        plt.subplot(1, 2, 2)
+        plt.title('Price Spread')
+        sns.boxplot(y=cars.Price)
+        plt.show()
 
-    print(separator)
-    print('MARKS COUNT PLOT')
-    plt.figure(figsize=(25, 8))
-    plt.subplot(1, 1, 1)
-    sub_plt = cars.Mark.value_counts().plot(kind='bar')
-    plt.title('Marks')
-    sub_plt.set(xlabel='Marks', ylabel='Frequency')
-    plt.show()
+        print(separator)
+        print('MARKS COUNT PLOT')
+        plt.figure(figsize=(25, 8))
+        plt.subplot(1, 1, 1)
+        sub_plt = cars.Mark.value_counts().plot(kind='bar')
+        plt.title('Marks')
+        sub_plt.set(xlabel='Marks', ylabel='Frequency')
+        plt.show()
 
-    print(separator)
-    print('CAT FEATURES VS PRICE PLOTS')
-    grid_place = 1
-    plt.figure(figsize=(30, 40))
-    exclude_cat_features = ['Mark', 'City']
-    cat_features = [x for x in list(cars.select_dtypes(include=['object', 'bool']).columns) if x not in exclude_cat_features]
-    for cat_feature in cat_features:
-        build_cat_feature_plot(cat_feature, grid_place)
-        grid_place += 2
-    plt.tight_layout()
-    plt.show()
+        print(separator)
+        print('CAT FEATURES VS PRICE PLOTS')
+        grid_place = 1
+        plt.figure(figsize=(30, 40))
+        exclude_cat_features = ['Mark', 'City']
+        cat_features = [x for x in list(cars.select_dtypes(include=['object', 'bool']).columns) if x not in exclude_cat_features]
+        for cat_feature in cat_features:
+            build_cat_feature_plot(cat_feature, grid_place)
+            grid_place += 2
+        plt.tight_layout()
+        plt.show()
 
-    print(separator)
-    print('NUM FEATURES VS PRICE PLOTS')
-    grid_place = 1
-    plt.figure(figsize=(20, 20))
-    exclude_num_features = ['Price']
-    num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
-    for num_feature in num_features:
-        build_num_feature_plot(num_feature, grid_place)
-        grid_place += 1
-    plt.tight_layout()
-    plt.show()
+        print(separator)
+        print('NUM FEATURES VS PRICE PLOTS')
+        grid_place = 1
+        plt.figure(figsize=(20, 20))
+        exclude_num_features = ['Price']
+        num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
+        for num_feature in num_features:
+            build_num_feature_plot(num_feature, grid_place)
+            grid_place += 1
+        plt.tight_layout()
+        plt.show()
 
     print(separator)
     print('ENCODED FEATURE')
@@ -109,11 +130,45 @@ def run():
     plt.show()
 
     print(separator)
+    print('MODELS COMPARE PLOTS')
+    x = cars.drop('Price', axis=1)
+    y = cars['Price']
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=369)
     lr_model = linear_model.LinearRegression()
     lasso_model = linear_model.Lasso()
     ridge_model = linear_model.Ridge()
     en_model = linear_model.ElasticNet()
+    lr_model.fit(x_train, y_train)
+    lasso_model.fit(x_train, y_train)
+    ridge_model.fit(x_train, y_train)
+    en_model.fit(x_train, y_train)
+    lr_pred = lr_model.predict(x_test)
+    lasso_pred = lasso_model.predict(x_test)
+    ridge_pred = ridge_model.predict(x_test)
+    en_pred = en_model.predict(x_test)
+    build_compare_plot(lr_pred, y_test, 'LinearRegression')
+    build_compare_plot(lasso_pred, y_test, 'Lasso')
+    build_compare_plot(ridge_pred, y_test, 'Ridge')
+    build_compare_plot(en_pred, y_test, 'ElasticNet')
+
+    print(separator)
+    print('MODELS COMPARE METRICS (best - first, worst - last)')
+    lr_metrics = build_compare_metrics(lr_pred, y_test)
+    lasso_metrics = build_compare_metrics(lasso_pred, y_test)
+    ridge_metrics = build_compare_metrics(ridge_pred, y_test)
+    en_metrics = build_compare_metrics(en_pred, y_test)
+    metrics_df = pd.DataFrame({
+        'LinearRegression': lr_metrics,
+        'Lasso': lasso_metrics,
+        'Ridge': ridge_metrics,
+        'ElasticNet': en_metrics,
+    }, index=['MSE', 'RMSE', 'R2']).T.sort_values(by=['R2', 'RMSE', 'MSE'], ascending=[False, True, True])
+    print(metrics_df)
+    print(separator)
 
 
 if __name__ == '__main__':
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', dest='only_models_compare', action='store_true')
+    args = parser.parse_args()
+    run(args.only_models_compare)
