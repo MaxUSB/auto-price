@@ -1,16 +1,15 @@
-import os
 import argparse
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn import linear_model
+from modules.utils import get_data
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 
-cars = pd.read_csv(f"{os.getenv('project_path')}/data/autoru_learn.csv")
-separator = '======================================================================================\n' \
-            '====================================================================================== '
+cars = get_data('autoru_learn.csv', 'raw')
+separator = '======================================================================================'
 
 
 def build_cat_feature_plot(x, grid_place):
@@ -168,7 +167,7 @@ def run(only_models_compare=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c', dest='only_models_compare', action='store_true')
-    args = parser.parse_args()
+    args_parser = argparse.ArgumentParser()
+    args_parser.add_argument('-c', dest='only_models_compare', action='store_true')
+    args = args_parser.parse_args()
     run(args.only_models_compare)

@@ -1,11 +1,10 @@
-import os
-import pandas as pd
 from modules import Predictor
+from modules.utils import get_data
 
 
 def teach():
     print('getting data...', end=' ')
-    data = pd.read_csv(f"{os.getenv('project_path')}/data/autoru_learn.csv")
+    data = get_data('autoru_learn.csv', 'raw')
 
     print('done.\nfit model...')
     predictor = Predictor()
@@ -19,6 +18,9 @@ def teach():
     if not success:
         print(f'error: {error}')
         return 1
+    print('done.')
+
+    return 0
 
 
 if __name__ == '__main__':
