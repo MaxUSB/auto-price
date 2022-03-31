@@ -1,5 +1,7 @@
 import os
+import sys
 import json
+import pickle
 import pandas as pd
 
 project_path = os.getenv('project_path')
@@ -17,15 +19,18 @@ def get_data(file_name, sub_dir=''):
     file_path = f"{full_dir_path}/{file_name}"
     
     if not os.path.exists(file_path):
-        print(f"error: file '{file_path}' not exist")
+        print(f"error: file '{file_path}' not exist", file=sys.stderr)
+        return None
     
     if '.csv' in file_name:
-        return pd.read_csv(file_path)
+        data = pd.read_csv(file_path)
     elif '.pickle' in file_name:
-        pass
+        with open(file_path, 'rb') as f:
+            data = pickle.load(f)
     else:
-        print(f"error: unsupported file extension {file_name.split('.')[-1]} for saving data")
-    return None
+        print(f"error: unsupported file extension {file_name.split('.')[-1]} for saving data", file=sys.stderr)
+        return None
+    return data
 
 
 def save_data(data, file_name, sub_dir=''):
@@ -41,8 +46,9 @@ def save_data(data, file_name, sub_dir=''):
     if '.csv' in file_name:
         data.to_csv(file_path, index=False)
     elif '.pickle' in file_name:
-        pass
+        with open(file_path, 'wb') as f:
+            pickle.dump(data, f)
     else:
-        print(f"error: unsupported file extension {file_name.split('.')[-1]} for saving data")
+        print(f"error: unsupported file extension {file_name.split('.')[-1]} for saving data", file=sys.stderr)
         return False
     return True

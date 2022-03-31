@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn import linear_model
 from modules.utils import get_data
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 
 cars = get_data('autoru_learn.csv', 'raw')
 separator = '======================================================================================'
@@ -119,7 +119,7 @@ def run(only_models_compare=False):
     cars['City'] = cars['CityID']
     cars.drop(columns=['CityID'], inplace=True)
     cars['Pts'] = np.where(cars['Pts'].str.contains('ORIGINAL'), 1, 0)
-    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType'], prefix=["transmission", "fuel", 'gear'])
+    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType'], prefix=['transmission', 'fuel', 'gear'])
     print(cars.head())
 
     print(separator)
@@ -133,10 +133,10 @@ def run(only_models_compare=False):
     x = cars.drop('Price', axis=1)
     y = cars['Price']
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=369)
-    lr_model = linear_model.LinearRegression()
-    lasso_model = linear_model.Lasso()
-    ridge_model = linear_model.Ridge()
-    en_model = linear_model.ElasticNet()
+    lr_model = LinearRegression()
+    lasso_model = Lasso()
+    ridge_model = Ridge()
+    en_model = ElasticNet()
     lr_model.fit(x_train, y_train)
     lasso_model.fit(x_train, y_train)
     ridge_model.fit(x_train, y_train)

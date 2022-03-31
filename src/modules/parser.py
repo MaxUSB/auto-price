@@ -1,3 +1,4 @@
+import sys
 import time
 import requests
 import pandas as pd
@@ -109,17 +110,19 @@ class Parser:
                             car_dict['GearType'] = None
                         parsed_cars.append(car_dict)
                 else:
-                    print(f'\nerror: {response.status_code} status for page {page}')
+                    print(f'\nerror: {response.status_code} status for page {page}', file=sys.stderr)
 
             print('done.\nsaving data...', end=' ')
             parsed_cars_df = parsed_cars_df.append(parsed_cars)
             parsed_cars_df.drop_duplicates(['ID', 'Mark'], inplace=True)
             parsed_cars_df.drop(columns=['ID'], inplace=True)
-            save_data(parsed_cars_df, 'autoru_learn.csv', 'raw')
+            success = save_data(parsed_cars_df, 'autoru_learn.csv', 'raw')
+            if not success:
+                return 1
             print('done.')
 
         if parsed_cars_df.empty:
-            print('error: no car was parsed')
+            print('error: no car was parsed', file=sys.stderr)
             return 1
 
         return 0

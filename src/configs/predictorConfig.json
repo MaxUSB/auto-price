@@ -1,1 +1,34 @@
-{}
+{
+  "target": "Price",
+  "features": {
+    "Mark": "custom",
+    "City": "custom",
+    "Owners": "none",
+    "Pts": "dummy",
+    "Transmission": "one-hot",
+    "FuelType": "one-hot",
+    "GearType": "one-hot",
+    "Year": "none",
+    "Mileage": "none",
+    "HP": "none",
+    "Price": "none"
+  },
+  "filters": {
+    "GearType": {
+      "filter_type": "binary_union",
+      "true_value": "4wd",
+      "false_value": "2wd",
+      "condition_values": ["ALL_WHEEL_DRIVE"]
+    },
+    "Transmission": {
+      "filter_type": "binary_union",
+      "true_value": "mt",
+      "false_value": "at",
+      "condition_values": ["MECHANICAL"]
+    },
+    "FuelType": {
+      "filter_type": "simple_filter",
+      "values": ["GASOLINE", "DIESEL"]
+    }
+  }
+}
