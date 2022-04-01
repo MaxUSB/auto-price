@@ -20,7 +20,7 @@ class Predictor:
             filter_params = self.filters[field]
             if filter_params['filter_type'] == 'binary_union':
                 data[field] = data[field].apply(
-                    lambda x: filter_params['true_value'] if x in filter_params['condition_values'] else filter_params['true_value']
+                    lambda x: filter_params['true_value'] if x in filter_params['condition_values'] else filter_params['false_value']
                 )
             elif filter_params['filter_type'] == 'simple_filter':
                 data = data[data[field].isin(filter_params['values'])]
@@ -36,7 +36,7 @@ class Predictor:
                 cities = data[['City']].drop_duplicates()
                 cities['CityID'] = cities['City'].astype('category')
                 cities['CityID'] = cities['CityID'].cat.codes
-                self.custom_encode_dicts[field] = cities.set_index('City')
+                self.custom_encode_dicts[field] = cities.set_index('City')['CityID']
             else:
                 print(f'error: not found set encode dict handle for {field} field', file=sys.stderr)
 
@@ -46,25 +46,26 @@ class Predictor:
             if encoding_type == 'custom':
                 custom_encode_dict = self.custom_encode_dicts[field]
                 data[field] = data[field].apply(
-                    lambda x: custom_encode_dict.loc[x] if x in custom_encode_dict.index else custom_encode_dict[field].mean()
+                    lambda x: custom_encode_dict.loc[x] if x in custom_encode_dict.index else custom_encode_dict.mean()
                 )
-            if encoding_type == 'one-hot':
-                data = pd.get_dummies(data, columns=[field], prefix=[field])
-            if encoding_type == 'dummy':
+            elif encoding_type == 'dummy':
                 data = pd.get_dummies(data, columns=[field], prefix=[field], drop_first=True)
+            elif encoding_type == 'none':
+                continue
             else:
                 print(f'error: not found {encoding_type} encoding type handle', file=sys.stderr)
+        data.columns = [col.split('_')[0] for col in data.columns]
         return data
 
     def fit(self, data):
         try:
-            data = data[self.features]
+            data = data[self.features.keys()]
             print('filtering data...', end=' ')
-            data = self.__filter_data(data)
+            data = self.__filter_data(data.copy())
             print('done.\nsetting custom field encode dicts...', end=' ')
             self.__set_custom_field_encode_dicts(data)
             print('done.\nencoding fields...', end=' ')
-            data = self.__encode_fields(data)
+            data = self.__encode_fields(data.copy())
             print('done.\ncreating training pool...', end=' ')
             x = data.drop(columns=self.target)
             y = data[self.target]
@@ -89,11 +90,11 @@ class Predictor:
     def predict(self, data):
         try:
             data[self.target] = 0
-            data = data[self.features]
+            data = data[self.features.keys()]
             print('filtering data...', end=' ')
-            data = self.__filter_data(data)
+            data = self.__filter_data(data.copy())
             print('done.\nencoding fields...', end=' ')
-            data = self.__encode_fields(data)
+            data = self.__encode_fields(data.copy())
             x = data.drop(columns=self.target)
             print('done.\npredicting price...', end=' ')
             data[self.target] = self.model.predict(x)
@@ -123,4 +124,4 @@ class Predictor:
         return True
 
     def get_feature_importance(self):
-        return self.model.coef_
+        return dict(zip(self.model.feature_names_in_, self.model.coef_))

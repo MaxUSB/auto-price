@@ -1,5 +1,4 @@
 import argparse
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -118,8 +117,7 @@ def run(only_models_compare=False):
     cities_id = cars[['City', 'CityID']].drop_duplicates()  # dict of cities
     cars['City'] = cars['CityID']
     cars.drop(columns=['CityID'], inplace=True)
-    cars['Pts'] = np.where(cars['Pts'].str.contains('ORIGINAL'), 1, 0)
-    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType'], prefix=['transmission', 'fuel', 'gear'])
+    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType', 'Pts'], drop_first=True)
     print(cars.head())
 
     print(separator)
