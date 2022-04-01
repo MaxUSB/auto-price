@@ -1,6 +1,7 @@
 numpy==1.21.2
 pandas==1.4.1
 seaborn==0.11.2
+twisted==22.2.0
 requests==2.27.1
 matplotlib==3.5.1
 scikit-learn==1.0.2

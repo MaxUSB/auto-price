@@ -3,7 +3,7 @@ from modules import Predictor
 from modules.utils import get_data
 
 
-def teach():
+def run():
     print('getting data...', end=' ')
     data = get_data('autoru_learn.csv', 'raw')
     if data is None:
@@ -16,7 +16,7 @@ def teach():
         print(f'error: {error}', file=sys.stderr)
         return 1
 
-    print('store model...', end=' ')
+    print('<=\nstore model...', end=' ')
     success = predictor.store_model()
     if not success:
         return 1
@@ -26,4 +26,4 @@ def teach():
 
 
 if __name__ == '__main__':
-    raise SystemExit(teach())
+    raise SystemExit(run())

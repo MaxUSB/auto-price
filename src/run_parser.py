@@ -6,8 +6,9 @@ def run(start_price, end_price):
     rc = None
     parser = Parser(start_price, end_price)
 
-    print('AutoRu parsing:')
+    print('AutoRu parsing =>')
     rc = parser.get_autoru_cars()
+    print('<=')
 
     return rc
 
