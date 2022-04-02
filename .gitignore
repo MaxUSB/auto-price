@@ -2,4 +2,4 @@
 data/
 .DS_Store
 *.env
-src/configs/dbConnectionsConfig.json
+src/configs/dbConfig.json
