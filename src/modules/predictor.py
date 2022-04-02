@@ -123,6 +123,3 @@ class Predictor:
         self.error_model = model_data['error_model']
         self.custom_encode_dicts = model_data['custom_encode_dicts']
         return True
-
-    def get_feature_importance(self):
-        return dict(zip(self.model.feature_names_in_, self.model.coef_))
