@@ -89,19 +89,20 @@ class Predictor:
 
     def predict(self, data):
         try:
+            result = {}
             data[self.target] = 0
             data = data[self.features.keys()]
             print('filtering data...', end=' ')
             data = self.__filter_data(data.copy())
             print('done.\nencoding fields...', end=' ')
             data = self.__encode_fields(data.copy())
-            x = data.drop(columns=self.target)
+            data.drop(columns=self.target, inplace=True)
             print('done.\npredicting price...', end=' ')
-            data[self.target] = self.model.predict(x)
+            result[self.target] = self.model.predict(data)
             print('done.\npredicting error...', end=' ')
-            data['PredictedError'] = self.error_model.predict(x)
+            result['PredictedError'] = self.error_model.predict(data)
             print('done.')
-            return True, data
+            return True, result
         except Exception as e:
             print(f'error: {e}', file=sys.stderr)
             return False, None
