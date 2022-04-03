@@ -1,5 +1,7 @@
 .idea/
 data/
+dashboard/node_modules
+dashboard/build
 .DS_Store
 *.env
 src/configs/dbConfig.json
