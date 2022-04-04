@@ -1,4 +1,6 @@
-import React from 'react';
+import api from '../utils/api';
+import React, {useEffect} from 'react';
+import {TResponse} from "../utils/types";
 import {CurrencyRuble} from '@mui/icons-material'
 import {createStyles, makeStyles} from "@mui/styles";
 import {Button, Grid, Stepper, Step, StepLabel, Theme} from '@mui/material'
@@ -22,8 +24,25 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const steps = ['Ввод параметров автомобиля', 'Результаты оценки стоимости'];
 
+interface ICatalogs {
+  markList: string[] | null;
+  capacityList: number[] | null;
+}
+
+interface IPredictState {
+  catalogs: ICatalogs;
+}
+
 const Predict = () => {
   const classes = useStyles();
+
+  useEffect(() => {
+    reloadCatalogs()
+  }, [])
+
+  const reloadCatalogs = async () => {
+    const response = (await api('get', 'catalogs')) as TResponse;
+  }
 
   return (
     <Grid container className={classes.root}>
