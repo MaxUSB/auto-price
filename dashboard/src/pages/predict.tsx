@@ -1,14 +1,33 @@
-import './predict.css';
 import React from 'react';
 import {CurrencyRuble} from '@mui/icons-material'
-import {Button, Grid, Stepper, Step, StepLabel} from '@mui/material'
+import {createStyles, makeStyles} from "@mui/styles";
+import {Button, Grid, Stepper, Step, StepLabel, Theme} from '@mui/material'
 
-const steps = ['Введите параметры автомобиля', 'Результаты оценки'];
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      height: '100vh',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    content: {
+      margin: '20px 0',
+      padding: '30px',
+      borderRadius: '10px',
+      height: 'calc(100% - 40px)',
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    },
+  }),
+);
+
+const steps = ['Ввод параметров автомобиля', 'Результаты оценки стоимости'];
 
 const Predict = () => {
+  const classes = useStyles();
+
   return (
-    <Grid container className="root">
-      <Grid container item xs={10} direction="column" className="content">
+    <Grid container className={classes.root}>
+      <Grid container item xs={10} direction="column" className={classes.content}>
         <Stepper>
           {steps.map(step => (
             <Step key={step}>
