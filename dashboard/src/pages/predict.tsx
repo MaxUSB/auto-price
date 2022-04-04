@@ -28,13 +28,15 @@ const Predict = () => {
   return (
     <Grid container className={classes.root}>
       <Grid container item xs={10} direction="column" className={classes.content}>
-        <Stepper>
-          {steps.map(step => (
-            <Step key={step}>
-              <StepLabel>{step}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+        <Grid item xs={12}>
+          <Stepper>
+            {steps.map(step => (
+              <Step key={step}>
+                <StepLabel>{step}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Grid>
       </Grid>
     </Grid>
   );

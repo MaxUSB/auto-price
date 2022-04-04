@@ -28,4 +28,5 @@ class Server:
     def run(self, port):
         self.api.add_resource(self.CatalogsAPI, '/catalogs', '/catalogs/')
         self.api.add_resource(self.PredictorAPI, '/predict', '/predict/')
+        self.api.init_app(self.app)
         self.app.run(debug=True, port=port)
