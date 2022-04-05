@@ -21,9 +21,9 @@ class DataBase:
         cols = ','.join(cols_list)
         constraints_list = []
         for constraint in schema['constraints']:
-            cons_cols = ','.join(constraint['cols'])
+            constraint_cols = ','.join(constraint['cols'])
             constraints_list.append(f'''
-                CONSTRAINT {constraint['constraint_name']} UNIQUE ({cons_cols})
+                CONSTRAINT {constraint['constraint_name']} UNIQUE ({constraint_cols})
             ''')
         constraints = ','.join(constraints_list)
         if len(constraints_list) > 0:
