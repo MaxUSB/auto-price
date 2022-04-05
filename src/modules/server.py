@@ -1,16 +1,26 @@
-from flask import Flask, request
 from flask_cors import CORS
 from .predictor import Predictor
-from flask_restful import Api, Resource, reqparse
+from flask import Flask, request
+from flask_restful import Api, Resource
 
 
 class Server:
     def __init__(self):
         self.app = Flask(__name__)
         self.api = Api(self.app)
-        CORS(self.app, resources={r"/*": {"origins": "*"}})
+        CORS(self.app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
+        predictor = Predictor()
+        predictor.restore_model()
+
+        self.initedCatalogsAPI = self.CatalogsAPI.init()
+        self.initedPredictorAPI = self.PredictorAPI.init(predictor)
 
     class CatalogsAPI(Resource):
+        @classmethod
+        def init(cls):
+            return cls
+
         @staticmethod
         def get():
             mark = request.args.get('mark')
@@ -28,12 +38,14 @@ class Server:
                        }, 200
 
     class PredictorAPI(Resource):
-        @staticmethod
-        def post():
+        @classmethod
+        def init(cls, predictor):
+            cls.predictor = predictor
+            return cls
+
+        def post(self):
             data = request.json.get('data')
-            predictor = Predictor()
-            predictor.restore_model()
-            success, predictions = predictor.predict(data)
+            success, predictions = self.predictor.predict(data)
             if not success:
                 return {
                            'success': False,
@@ -48,7 +60,6 @@ class Server:
                        }, 200
 
     def run(self, port):
-        self.api.add_resource(self.CatalogsAPI, '/catalogs')
-        self.api.add_resource(self.PredictorAPI, '/predict')
-        self.api.init_app(self.app)
+        self.api.add_resource(self.initedCatalogsAPI, '/catalogs')
+        self.api.add_resource(self.initedPredictorAPI, '/predict')
         self.app.run(debug=True, port=port)
