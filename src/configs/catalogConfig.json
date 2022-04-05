@@ -1,7 +1,7 @@
 {
   "tables": [
     {
-      "table_name": "auto_marks",
+      "table_name": "marks",
       "cols": [
         {
           "name": "id",
@@ -16,14 +16,14 @@
       "foreign_keys": []
     },
     {
-      "table_name": "auto_capacity",
+      "table_name": "capacities",
       "cols": [
         {
           "name": "id",
           "type": "serial primary key"
         },
         {
-          "name": "auto_id",
+          "name": "mark_id",
           "type": "int"
         },
         {
@@ -35,15 +35,15 @@
         {
           "constraint_name": "absolutely_unique",
           "cols": [
-            "auto_id",
+            "mark_id",
             "capacity"
           ]
         }
       ],
       "foreign_keys": [
         {
-          "col_in_this_table": "auto_id",
-          "target_table": "auto_marks",
+          "col_in_this_table": "mark_id",
+          "target_table": "marks",
           "col_in_target_table": "id"
         }
       ]

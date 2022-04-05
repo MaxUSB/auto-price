@@ -44,28 +44,24 @@ class DataBase:
                         {foreign_keys}
                     )
         '''
-        cur = self.connection.cursor()
+        conn = self.engine.connect()
         try:
-            cur.execute(create_query)
-            self.connection.commit()
+            conn.execute(create_query)
         except:
-            cur.execute("ROLLBACK")
-            self.connection.commit()
+            return
 
     def insert_table(self, schema, cols_list, data):
         cols = []
         for col in cols_list:
             cols.append(col['name'])
         cols = ','.join(cols)
-        cur = self.connection.cursor()
+        conn = self.engine.connect()
         for row in data:
             values = ','.join(row)
             insert_query = f'''
                 INSERT INTO {schema['table_name']} ({cols}) values({values})
             '''
             try:
-                cur.execute(insert_query)
-                self.connection.commit()
+                conn.execute(insert_query)
             except:
-                cur.execute("ROLLBACK")
-                self.connection.commit()
+                return

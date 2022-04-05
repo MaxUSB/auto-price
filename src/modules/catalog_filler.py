@@ -10,15 +10,17 @@ class CatalogFiller:
 
     def fill_catalogs(self):
         try:
+            print('Connecting to database...')
             db = DataBase(connect_data=get_config('db')['catalogs'])
+            print('Fill catalogs...')
             self.__fill_auto_marks(db)
             self.__fill_auto_capacity(db)
-            db.__del__()
+            print('Done.')
         except:
             print('Connection failed')
 
     def __fill_auto_marks(self, db):
-        auto_marks = list(filter(lambda item: item['table_name'] == 'auto_marks', self.config['tables']))[0]
+        auto_marks = list(filter(lambda item: item['table_name'] == 'marks', self.config['tables']))[0]
         db.create_table(auto_marks)
 
         data = []
@@ -29,20 +31,23 @@ class CatalogFiller:
         db.insert_table(auto_marks, cols_list, data)
 
     def __fill_auto_capacity(self, db):
-        auto_capacity = list(filter(lambda item: item['table_name'] == 'auto_capacity', self.config['tables']))[0]
+        auto_capacity = list(filter(lambda item: item['table_name'] == 'capacities', self.config['tables']))[0]
         db.create_table(auto_capacity)
 
         data = []
-        for i, row in self.cars[['Mark', 'Capacity']].iterrows():
+        for i, row in self.cars[['Mark', 'Capacity']].drop_duplicates().iterrows():
             values = []
             for value in row:
                 if isinstance(value, str):
                     select_query = f'''
-                        SELECT id from auto_marks
+                        SELECT id from marks
                         WHERE mark = '{value}'
                     '''
-                    auto = db.select_query(select_query)['id'][0]
-                    values.append(auto.__str__())
+                    try:
+                        auto = db.select_query(select_query)[1]['id'].values[0]
+                        values.append(auto.__str__())
+                    except:
+                        continue
                 elif isinstance(value, int):
                     values.append(value.__str__())
             data.append(values)
