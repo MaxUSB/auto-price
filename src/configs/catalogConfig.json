@@ -1,0 +1,52 @@
+{
+  "tables": [
+    {
+      "table_name": "auto_marks",
+      "cols": [
+        {
+          "name": "id",
+          "type": "serial primary key"
+        },
+        {
+          "name": "mark",
+          "type": "text UNIQUE"
+        }
+      ],
+      "constraints": [],
+      "foreign_keys": []
+    },
+    {
+      "table_name": "auto_capacity",
+      "cols": [
+        {
+          "name": "id",
+          "type": "serial primary key"
+        },
+        {
+          "name": "auto_id",
+          "type": "int"
+        },
+        {
+          "name": "capacity",
+          "type": "int"
+        }
+      ],
+      "constraints": [
+        {
+          "constraint_name": "absolutely_unique",
+          "cols": [
+            "auto_id",
+            "capacity"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "col_in_this_table": "auto_id",
+          "target_table": "auto_marks",
+          "col_in_target_table": "id"
+        }
+      ]
+    }
+  ]
+}
