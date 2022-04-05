@@ -1,9 +1,9 @@
 import React from 'react';
 import {DirectionsCar} from '@mui/icons-material'
 import {createStyles, makeStyles} from '@mui/styles'
-import {Button, Grid, Theme, Typography, Avatar} from '@mui/material'
+import {Button, Grid, Typography, Avatar} from '@mui/material'
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       height: '100vh',
@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: '10px',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      backgroundColor: '#FFFFFFB2',
     },
     logo: {
       gap: '20px',

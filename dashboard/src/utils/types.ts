@@ -1,7 +1,11 @@
 export interface IResponse {
   success: boolean;
-  result: any[];
+  data: any;
   error?: string;
 }
 
 export type TResponse = IResponse;
+
+export interface IDictionary<T> {
+  [key: string]: T;
+}
