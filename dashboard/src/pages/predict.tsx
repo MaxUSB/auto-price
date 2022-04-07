@@ -1,7 +1,7 @@
 import api from '../utils/api';
-import React, {FormEvent, useEffect, useState} from 'react';
 import {createStyles, makeStyles} from '@mui/styles';
 import {IDictionary, TResponse} from '../utils/types';
+import React, {FormEvent, useEffect, useState} from 'react';
 import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Alert, Backdrop, CircularProgress} from '@mui/material'
 
 const useStyles = makeStyles(() =>
@@ -30,7 +30,7 @@ interface IError {
 
 interface ICatalogs {
   markList?: string[];
-  capacityList?: number[];
+  hpList?: number[];
 }
 
 interface ICar {
@@ -65,16 +65,30 @@ const Predict = () => {
   });
 
   const reloadCatalogs = async (mark: string | undefined) => {
-    const response = (await api('get', 'catalogs', mark ? {mark} : undefined)) as TResponse;
-    if (!response.success) {
-      setState({...state, error: {open: true, message: response.error!}});
-      return;
+    const tasks = [];
+    if (mark) {
+      tasks.push(api('get', 'catalogs', {catalog: 'mark_params', mark}));
+    } else {
+      tasks.push(api('get', 'catalogs', {catalog: 'marks', mark}));
+      tasks.push(api('get', 'catalogs', {catalog: 'cities', mark}));
     }
+    const responses = await Promise.all(tasks);
     const catalogs: IDictionary<any[]> = {...state.catalogs};
-    Object.keys(response.data).forEach(param => {
-      catalogs[`${param}List`] = response.data[param];
+    const errors: string[] = [];
+    responses.forEach(response => {
+      if (!response.success) {
+        errors.push(response.error!);
+      } else {
+        Object.keys(response.data).forEach(param => {
+          catalogs[`${param}List`] = response.data[param];
+        });
+      }
     });
-    setState({...state, catalogs});
+    if (errors) {
+      setState({...state, catalogs, error: {open: true, message: errors.join('\n')}});
+    } else {
+      setState({...state, catalogs});
+    }
   };
 
   const handleCloseNotification = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -128,9 +142,9 @@ const Predict = () => {
       <Backdrop open={state.isLoading}>
         <CircularProgress sx={{color: "#23D5ABFF"}}/>
       </Backdrop>
-      <Snackbar open={state.error.open} autoHideDuration={4000} onClose={handleCloseNotification}>
-        <Alert variant="filled" severity="error">{state.error.message}</Alert>
-      </Snackbar>
+      {/*<Snackbar open={state.error.open} autoHideDuration={4000} onClose={handleCloseNotification} message={state.error.message}/>*/}
+      {/*  <Alert variant="filled" severity="error">{state.error.message}</Alert>*/}
+      {/*</Snackbar>*/}
     </Grid>
   );
 }

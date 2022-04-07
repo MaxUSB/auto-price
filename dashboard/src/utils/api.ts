@@ -4,13 +4,13 @@ import queryString from 'query-string';
 
 const api = (
   method: 'get' | 'post',
-  module: string,
+  endpoint: string,
   params: any = undefined
 ): Promise<TResponse> => new Promise(resolve => {
   const getQueryString = method === 'get' && params ? `?${queryString.stringify(params)}` : '';
   const body = method !== 'get' && params ? JSON.stringify(params) : undefined;
 
-  fetch(`http://localhost:3001/${module}${getQueryString}`, {
+  fetch(`http://localhost:3001/${endpoint}${getQueryString}`, {
     method: method.toUpperCase(),
     headers: {
       'Content-Type': 'application/json',
