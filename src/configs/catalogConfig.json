@@ -1,0 +1,100 @@
+{
+  "tables": [
+    {
+      "table_name": "marks",
+      "cols": [
+        {
+          "name": "id",
+          "type": "serial primary key"
+        },
+        {
+          "name": "mark",
+          "type": "text UNIQUE"
+        }
+      ],
+      "constraints": [],
+      "foreign_keys": []
+    },
+    {
+      "table_name": "capacities",
+      "cols": [
+        {
+          "name": "id",
+          "type": "serial primary key"
+        },
+        {
+          "name": "mark_id",
+          "type": "int"
+        },
+        {
+          "name": "capacity",
+          "type": "int"
+        }
+      ],
+      "constraints": [
+        {
+          "constraint_name": "absolutely_unique",
+          "cols": [
+            "mark_id",
+            "capacity"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "col_in_this_table": "mark_id",
+          "target_table": "marks",
+          "col_in_target_table": "id"
+        }
+      ]
+    },
+    {
+      "table_name": "cities",
+      "cols": [
+        {
+          "name": "id",
+          "type": "serial primary key"
+        },
+        {
+          "name": "city",
+          "type": "text UNIQUE"
+        }
+      ],
+      "constraints": [],
+      "foreign_keys": []
+    },
+    {
+      "table_name": "horse_powers",
+      "cols": [
+        {
+          "name": "id",
+          "type": "serial primary key"
+        },
+        {
+          "name": "mark_id",
+          "type": "int"
+        },
+        {
+          "name": "horse_power",
+          "type": "int"
+        }
+      ],
+      "constraints": [
+        {
+          "constraint_name": "absolutely_unique",
+          "cols": [
+            "mark_id",
+            "horse_power"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "col_in_this_table": "mark_id",
+          "target_table": "marks",
+          "col_in_target_table": "id"
+        }
+      ]
+    }
+  ]
+}
