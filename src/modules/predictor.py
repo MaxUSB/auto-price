@@ -104,7 +104,7 @@ class Predictor:
             print('done.')
             return True, result
         except Exception as e:
-            print(f'error: {e}', file=sys.stderr)
+            print(f'error: {e}', file=sys.stderr, flush=True)
             return False, None
 
     def store_model(self):
