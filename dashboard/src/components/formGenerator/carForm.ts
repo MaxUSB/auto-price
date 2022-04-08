@@ -4,7 +4,25 @@ let marksOptions: ISelectOption[] = [];
 let citiesOptions: ISelectOption[] = [];
 let hpsOptions: ISelectOption[] = [];
 
-const ptsOptions: ISelectOption[] = [{label: 'Оригинал', value: 'ORIGINAL'}, {label: 'Дубликат', value: 'DUPLICATE'}];
+const ptsOptions: ISelectOption[] = [
+  {label: 'Оригинал', value: 'ORIGINAL'},
+  {label: 'Дубликат', value: 'DUPLICATE'},
+];
+const fuelTypeOptions: ISelectOption[] = [
+  {label: 'Бензин', value: 'GASOLINE'},
+  {label: 'Дизель', value: 'DIESEL'},
+];
+const gearTypeOptions: ISelectOption[] = [
+  {label: 'Передний', value: 'FORWARD_CONTROL'},
+  {label: 'Задний', value: 'REAR_DRIVE'},
+  {label: 'Полный', value: 'ALL_WHEEL_DRIVE'},
+];
+const transmissionOptions: ISelectOption[] = [
+  {label: 'Механика', value: 'MECHANICAL'},
+  {label: 'Автомат', value: 'AUTOMATIC'},
+  {label: 'Робот', value: 'ROBOT'},
+  {label: 'Вариатор', value: 'VARIATOR'},
+];
 
 const carForm = (cities: string[], marks: string[], hps: number[]): IFormItem[] => {
   citiesOptions = cities.map(city => ({label: city, value: city}));
@@ -17,27 +35,51 @@ const carForm = (cities: string[], marks: string[], hps: number[]): IFormItem[] 
       elementType: 'autocomplete',
       label: 'Город',
       selectOptions: citiesOptions,
+      groupBy: true,
     }, {
       field: 'mark',
       elementType: 'autocomplete',
       label: 'Марка',
       selectOptions: marksOptions,
+      groupBy: true,
     }, {
       field: 'hp',
       elementType: 'autocomplete',
       label: 'Л.С.',
       selectOptions: hpsOptions,
-    }
-    // {
-    //   field: 'pts',
-    //   elementType: 'select',
-    //   label: 'ПТС',
-    //   selectOptions: ptsOptions,
-    // }, {
-    //   field: 'mileage',
-    //   elementType: 'text',
-    //   label: 'Пробег',
-    // }
+    }, {
+      field: 'year',
+      elementType: 'text',
+      label: 'Год выпуска',
+    }, {
+      field: 'mileage',
+      elementType: 'text',
+      label: 'Пробег',
+    }, {
+      field: 'owners',
+      elementType: 'text',
+      label: 'Кол-во владельцев',
+    }, {
+      field: 'pts',
+      elementType: 'select',
+      label: 'ПТС',
+      selectOptions: ptsOptions,
+    }, {
+      field: 'fuelType',
+      elementType: 'select',
+      label: 'Тип топлива',
+      selectOptions: fuelTypeOptions,
+    }, {
+      field: 'gearType',
+      elementType: 'select',
+      label: 'Привод',
+      selectOptions: gearTypeOptions,
+    }, {
+      field: 'transmission',
+      elementType: 'select',
+      label: 'Тип КПП',
+      selectOptions: transmissionOptions,
+    },
   ]);
 };
 
