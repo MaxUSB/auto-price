@@ -5,8 +5,8 @@ import {Grid, Autocomplete, TextField, createFilterOptions, MenuItem} from "@mui
 export type THandleChange = (item: string) => (event: ChangeEvent<HTMLInputElement>, customValue?: any) => void;
 
 export interface ISelectOption {
-  label: string | number;
-  value: string | number;
+  label: string;
+  value: string;
   inputValue?: string;
 }
 
@@ -32,7 +32,7 @@ const formElements: IDictionary<TGetFormElements> = {
     return (
       <Grid item xs={3} key={item.field}>
         <Autocomplete
-          value={getValue(data, item)}
+          value={getValue(data, item) || ''}
           options={item.selectOptions!.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
@@ -64,7 +64,11 @@ const formElements: IDictionary<TGetFormElements> = {
             }
             return filtered;
           }}
-          getOptionLabel={option => {
+          getOptionLabel={(option?: any) => {
+            console.log(typeof option);
+            if (typeof option === 'string') {
+              return option;
+            }
             if (option.inputValue) {
               return option.inputValue;
             }
@@ -87,7 +91,7 @@ const formElements: IDictionary<TGetFormElements> = {
         required
         select
         label={item.label}
-        value={getValue(data, item)}
+        value={getValue(data, item) || ''}
         onChange={handleChange(item.field)}
         variant="outlined"
       >
@@ -106,7 +110,7 @@ const formElements: IDictionary<TGetFormElements> = {
       <TextField
         required
         label={item.label}
-        value={getValue(data, item)}
+        value={getValue(data, item) || ''}
         onChange={handleChange(item.field)}
         variant="outlined"
       />

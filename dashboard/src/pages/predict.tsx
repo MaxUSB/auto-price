@@ -4,7 +4,7 @@ import {IDictionary, TResponse} from '../utils/types';
 import carForm from "../components/formGenerator/carForm";
 import React, {ChangeEvent, FormEvent, useEffect, useState} from 'react';
 import formGenerator, {IFormItem} from "../components/formGenerator";
-import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Alert, Backdrop, CircularProgress, Avatar, Typography} from '@mui/material'
+import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Alert, Backdrop, CircularProgress, Avatar, Typography, Link} from '@mui/material'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -23,6 +23,7 @@ const useStyles = makeStyles(() =>
     logo: {
       gap: '20px',
       justifyContent: 'center',
+      textDecoration: 'none',
     },
   }),
 );
@@ -35,17 +36,17 @@ interface IError {
 }
 
 interface ICatalogs {
-  hpList?: number[];
+  hpList?: string[];
   cityList?: string[];
   markList?: string[];
 }
 
 interface ICar {
-  hp?: number;
-  mark?: string;
-  city?: number;
-  year?: number;
+  hp?: string;
   pts?: string;
+  city?: string;
+  mark?: string;
+  year?: number;
   owners?: number;
   mileage?: number;
   fuelType?: string;
@@ -80,7 +81,7 @@ const Predict = () => {
       tasks.push(api('get', 'catalogs', {catalog: 'cities', mark}));
     }
     const responses = await Promise.all(tasks);
-    const catalogs: IDictionary<any[]> = {...state.catalogs};
+    const catalogs: IDictionary<string[]> = {...state.catalogs};
     const errors: string[] = [];
     responses.forEach((response: TResponse) => {
       if (!response.success) {
@@ -138,9 +139,13 @@ const Predict = () => {
     <Grid container className={classes.root}>
       <Grid container item xs={10} direction="column" className={classes.content}>
         <Stack spacing={5}>
-          <Grid item container className={classes.logo}>
-            <Avatar src="logo.png" alt="Auto Price" sx={{width: 40, height: 40}}/>
-            <Typography variant="h4" textAlign="center">auto-price</Typography>
+          <Grid item xs={12}>
+            <Link href="/">
+              <Grid item container className={classes.logo}>
+                <Avatar src="logo.png" alt="Auto Price" sx={{width: 40, height: 40}}/>
+                <Typography variant="h4" textAlign="center">auto-price</Typography>
+              </Grid>
+            </Link>
           </Grid>
           <Grid item xs={12}>
             <Stepper activeStep={state.activeStep}>

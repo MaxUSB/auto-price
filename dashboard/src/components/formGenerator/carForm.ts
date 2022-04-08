@@ -24,7 +24,7 @@ const transmissionOptions: ISelectOption[] = [
   {label: 'Вариатор', value: 'VARIATOR'},
 ];
 
-const carForm = (cities: string[], marks: string[], hps: number[]): IFormItem[] => {
+const carForm = (cities: string[], marks: string[], hps: string[]): IFormItem[] => {
   citiesOptions = cities.map(city => ({label: city, value: city}));
   marksOptions = marks.map(mark => ({label: mark, value: mark}));
   hpsOptions = hps.map(hp => ({label: hp, value: hp}));

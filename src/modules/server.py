@@ -48,6 +48,7 @@ class Server:
                            }, 400
                 success, result, error = self.db.select_query(self.catalog_queries[catalog], {'mark': mark})
                 if success:
+                    result = result.astype(str)
                     return {
                                'success': True,
                                'data': {param: result[result.columns[i]].tolist() for i, param in enumerate(self.catalog_params[catalog])},
