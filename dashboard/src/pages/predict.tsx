@@ -1,8 +1,10 @@
 import api from '../utils/api';
 import {createStyles, makeStyles} from '@mui/styles';
 import {IDictionary, TResponse} from '../utils/types';
-import React, {FormEvent, useEffect, useState} from 'react';
-import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Alert, Backdrop, CircularProgress} from '@mui/material'
+import carForm from "../components/formGenerator/carForm";
+import React, {ChangeEvent, FormEvent, useEffect, useState} from 'react';
+import formGenerator, {IFormItem} from "../components/formGenerator";
+import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Alert, Backdrop, CircularProgress, Avatar, Typography} from '@mui/material'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -18,6 +20,10 @@ const useStyles = makeStyles(() =>
       height: 'calc(100% - 40px)',
       backgroundColor: '#FFFFFFB2',
     },
+    logo: {
+      gap: '20px',
+      justifyContent: 'center',
+    },
   }),
 );
 
@@ -29,8 +35,9 @@ interface IError {
 }
 
 interface ICatalogs {
-  markList?: string[];
   hpList?: number[];
+  cityList?: string[];
+  markList?: string[];
 }
 
 interface ICar {
@@ -38,12 +45,12 @@ interface ICar {
   mark?: string;
   city?: number;
   year?: number;
-  pts?: boolean;
+  pts?: string;
   owners?: number;
   mileage?: number;
-  transmission?: 'MT' | 'AT';
-  fuelType?: 'Бензин' | 'Дизель';
-  gearType?: 'Полный привод' | 'Монопривод';
+  fuelType?: string;
+  gearType?: string;
+  transmission?: string;
 }
 
 interface IPredictState {
@@ -75,7 +82,7 @@ const Predict = () => {
     const responses = await Promise.all(tasks);
     const catalogs: IDictionary<any[]> = {...state.catalogs};
     const errors: string[] = [];
-    responses.forEach(response => {
+    responses.forEach((response: TResponse) => {
       if (!response.success) {
         errors.push(response.error!);
       } else {
@@ -91,13 +98,25 @@ const Predict = () => {
     }
   };
 
-  const handleCloseNotification = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason !== 'clickaway') {
-      setState({...state, error: {...state.error, open: false}});
-    }
-  };
+  // const handleCloseNotification = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  //   if (reason !== 'clickaway') {
+  //     setState({...state, error: {...state.error, open: false}});
+  //   }
+  // };
 
   const handleChangeStep = (activeStep: number) => () => setState({...state, activeStep});
+
+  const carFormInit: IFormItem[] = carForm(
+    state.catalogs.cityList || [],
+    state.catalogs.markList || [],
+    state.catalogs.hpList || [],
+  );
+
+  const handleChange = (item: string) => (event: ChangeEvent<HTMLInputElement>, customValue?: any) => {
+    const {value} = event.target || {};
+    let newValue = customValue || value;
+    setState({...state, car: {...state.car, [item]: newValue}});
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -119,6 +138,10 @@ const Predict = () => {
     <Grid container className={classes.root}>
       <Grid container item xs={10} direction="column" className={classes.content}>
         <Stack spacing={5}>
+          <Grid item container className={classes.logo}>
+            <Avatar src="logo.png" alt="Auto Price" sx={{width: 40, height: 40}}/>
+            <Typography variant="h4" textAlign="center">auto-price</Typography>
+          </Grid>
           <Grid item xs={12}>
             <Stepper activeStep={state.activeStep}>
               {steps.map((step, num) => (
@@ -130,7 +153,8 @@ const Predict = () => {
           </Grid>
           <Grid item xs={12}>
             {state.activeStep === 0 ? (
-              <Grid item xs={12} component="form" onSubmit={handleSubmit}>
+              <Grid container item xs={12} component="form" onSubmit={handleSubmit}>
+                {formGenerator(carFormInit, state.car, handleChange)}
                 <Button variant="contained" type="submit">Оценить</Button>
               </Grid>
             ) : (
