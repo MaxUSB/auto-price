@@ -48,13 +48,12 @@ class Predictor:
                 data[field] = data[field].apply(
                     lambda x: custom_encode_dict.loc[x] if x in custom_encode_dict.index else custom_encode_dict.mean()
                 )
-            elif encoding_type == 'dummy':
-                data = pd.get_dummies(data, columns=[field], prefix=[field], drop_first=True)
+            elif encoding_type == 'one-hot':
+                data = pd.get_dummies(data, columns=[field], prefix=[field])
             elif encoding_type == 'none':
                 continue
             else:
                 print(f'error: not found {encoding_type} encoding type handle', file=sys.stderr)
-        data.columns = [col.split('_')[0] for col in data.columns]
         return data
 
     def fit(self, data):
@@ -97,10 +96,13 @@ class Predictor:
             print('done.\nencoding fields...', end=' ')
             data = self.__encode_fields(data.copy())
             data.drop(columns=self.target, inplace=True)
+            false_binary_columns = [col for col in self.model.feature_names_in_ if col not in data.columns]
+            if false_binary_columns:
+                data[false_binary_columns] = 0
             print('done.\npredicting price...', end=' ')
-            result[self.target] = self.model.predict(data)
+            result[self.target] = int(self.model.predict(data)[0])
             print('done.\npredicting error...', end=' ')
-            result['PredictedError'] = self.error_model.predict(data)
+            result['PredictedError'] = round(self.error_model.predict(data)[0], 2)
             print('done.')
             return True, result
         except Exception as e:

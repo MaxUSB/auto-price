@@ -81,8 +81,7 @@ class Server:
                 data = request.json.get('data')
                 data = pd.DataFrame(data, index=[0])
                 data.columns = list(col[0].capitalize() + (col[1:] if len(col) > 2 else col[1:].capitalize()) for col in data.columns)
-                # success, predictions = self.predictor.predict(data)
-                success, predictions = True, {'Price': 1100000, 'PredictedError': 0.09}
+                success, predictions = self.predictor.predict(data)
                 if not success:
                     return {
                                'success': False,

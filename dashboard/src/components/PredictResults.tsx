@@ -35,8 +35,8 @@ const PredictResults = (props: IPredictResultsProps) => {
   let markLinkPart = '';
 
   if (predictedPrice && predictedError) {
-    downRangeLimit = predictedPrice - predictedPrice * predictedError;
-    upRangeLimit = predictedPrice + predictedPrice * predictedError;
+    downRangeLimit = ~~(predictedPrice - predictedPrice * Math.abs(predictedError));
+    upRangeLimit = ~~(predictedPrice + predictedPrice * Math.abs(predictedError));
     markLinkPart = mark!.toLowerCase().replace(' ', '-');
   }
 
