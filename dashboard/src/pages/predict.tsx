@@ -2,9 +2,10 @@ import api from '../utils/api';
 import {createStyles, makeStyles} from '@mui/styles';
 import {IDictionary, TResponse} from '../utils/types';
 import carForm from "../components/formGenerator/carForm";
-import React, {ChangeEvent, FormEvent, useEffect, useState} from 'react';
-import formGenerator, {IFormItem} from "../components/formGenerator";
-import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Alert, Backdrop, CircularProgress, Avatar, Typography, Link} from '@mui/material'
+import PredictResults from '../components/PredictResults';
+import React, {FormEvent, useEffect, useState} from 'react';
+import formGenerator, {IFormItem} from '../components/formGenerator';
+import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Backdrop, CircularProgress, Avatar, Typography, Link, Alert} from '@mui/material';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -23,7 +24,20 @@ const useStyles = makeStyles(() =>
     logo: {
       gap: '20px',
       justifyContent: 'center',
-      textDecoration: 'none',
+    },
+    formItemContainer: {
+      padding: '20px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    formItem: {
+      width: '80%',
+      backgroundColor: '#FFFFFFB2',
+    },
+    formSubmit: {
+      padding: '40px 20px',
+      justifyContent: 'center',
     },
   }),
 );
@@ -60,15 +74,22 @@ interface IPredictState {
   activeStep: number;
   isLoading: boolean;
   catalogs: ICatalogs;
+  predictedPrice: number | null;
+  predictedError: number | null;
+  markLogo: string | null;
 }
 
 const Predict = () => {
   const classes = useStyles();
   const [state, setState] = useState<IPredictState>({
+    // car: {city: 'Тюмень', mark: 'Honda', hp: '190', year: 2007, mileage: 240000, owners: 4, pts: 'ORIGINAL', fuelType: 'GASOLINE', gearType: 'FORWARD_CONTROL', transmission: 'MECHANICAL'},
     car: {},
     catalogs: {},
     activeStep: 0,
+    markLogo: null,
     isLoading: false,
+    predictedPrice: null,
+    predictedError: null,
     error: {open: false, message: ''},
   });
 
@@ -99,11 +120,11 @@ const Predict = () => {
     }
   };
 
-  // const handleCloseNotification = (event?: React.SyntheticEvent | Event, reason?: string) => {
-  //   if (reason !== 'clickaway') {
-  //     setState({...state, error: {...state.error, open: false}});
-  //   }
-  // };
+  const handleCloseNotification = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason !== 'clickaway') {
+      setState({...state, error: {...state.error, open: false}});
+    }
+  };
 
   const handleChangeStep = (activeStep: number) => () => setState({...state, activeStep});
 
@@ -113,22 +134,19 @@ const Predict = () => {
     state.catalogs.hpList || [],
   );
 
-  const handleChange = (item: string) => (event: ChangeEvent<HTMLInputElement>, customValue?: any) => {
-    const {value} = event.target || {};
-    let newValue = customValue || value;
-    setState({...state, car: {...state.car, [item]: newValue}});
-  };
+  const handleChange = (item: string, value: any) => setState({...state, car: {...state.car, [item]: value}});
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setState({...state, isLoading: true});
-    const data = {'mark': 'Honda'}; //TODO get data from form
-    const response = (await api('post', 'predict', {data})) as TResponse;
+    const data = state.car;
+    const response = (await api('post', 'predict', {data, with_mark_logo: true})) as TResponse;
     if (!response.success) {
-      setState({...state, isLoading: false, error: {open: true, message: response.error!}});
+      setState({...state, isLoading: false, error: {open: true, message: String(response.error!)}});
       return;
     }
-    setState({...state, isLoading: false, activeStep: 1}) //TODO add variables for predict result
+    const r_data = response.data;
+    setState({...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError'], markLogo: r_data['Logo']})
   };
 
   useEffect(() => {
@@ -138,9 +156,9 @@ const Predict = () => {
   return (
     <Grid container className={classes.root}>
       <Grid container item xs={10} direction="column" className={classes.content}>
-        <Stack spacing={5}>
+        <Stack spacing={5} overflow="auto">
           <Grid item xs={12}>
-            <Link href="/">
+            <Link href="/" style={{color: 'black', textDecoration: 'none'}}>
               <Grid item container className={classes.logo}>
                 <Avatar src="logo.png" alt="Auto Price" sx={{width: 40, height: 40}}/>
                 <Typography variant="h4" textAlign="center">auto-price</Typography>
@@ -159,11 +177,15 @@ const Predict = () => {
           <Grid item xs={12}>
             {state.activeStep === 0 ? (
               <Grid container item xs={12} component="form" onSubmit={handleSubmit}>
-                {formGenerator(carFormInit, state.car, handleChange)}
-                <Button variant="contained" type="submit">Оценить</Button>
+                {formGenerator(carFormInit, state.car, handleChange, classes)}
+                <Grid container item xs={12} className={classes.formSubmit}>
+                  <Grid item xs={11}>
+                    <Button variant="contained" type="submit" fullWidth size="large">Оценить</Button>
+                  </Grid>
+                </Grid>
               </Grid>
             ) : (
-              <div>Predict Result Here</div>
+              <PredictResults predictedPrice={state.predictedPrice} predictedError={state.predictedError} mark={state.car.mark} markLogo={state.markLogo}/>
             )}
           </Grid>
         </Stack>
@@ -171,9 +193,11 @@ const Predict = () => {
       <Backdrop open={state.isLoading}>
         <CircularProgress sx={{color: "#23D5ABFF"}}/>
       </Backdrop>
-      {/*<Snackbar open={state.error.open} autoHideDuration={4000} onClose={handleCloseNotification} message={state.error.message}/>*/}
-      {/*  <Alert variant="filled" severity="error">{state.error.message}</Alert>*/}
-      {/*</Snackbar>*/}
+      {state.error.message ? (
+        <Snackbar open={state.error.open} autoHideDuration={4000} onClose={handleCloseNotification} anchorOrigin={{ vertical: "top", horizontal: "left" }}>
+          <Alert variant="filled" severity="error">{state.error.message}</Alert>
+        </Snackbar>
+      ): null}
     </Grid>
   );
 }

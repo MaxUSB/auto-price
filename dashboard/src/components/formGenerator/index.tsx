@@ -1,8 +1,8 @@
 import {IDictionary} from "../../utils/types";
-import React, {ReactNode, ChangeEvent} from 'react';
+import React, {ReactNode} from 'react';
 import {Grid, Autocomplete, TextField, createFilterOptions, MenuItem} from "@mui/material";
 
-export type THandleChange = (item: string) => (event: ChangeEvent<HTMLInputElement>, customValue?: any) => void;
+export type THandleChange = (item: string, value: any) => void;
 
 export interface ISelectOption {
   label: string;
@@ -22,35 +22,32 @@ export type TGetFormElements = (
   item: IFormItem,
   data: any,
   handleChange: THandleChange,
+  classes: any,
 ) => ReactNode;
 
-const getValue: any = (data: any, item: IFormItem) => data[item.field];
+const getValue: any = (data: any, item: IFormItem) => data[item.field] || '';
 
 const formElements: IDictionary<TGetFormElements> = {
-  autocomplete: (item: IFormItem, data: any, handleChange: THandleChange): ReactNode => {
+  autocomplete: (
+    item: IFormItem,
+    data: any,
+    handleChange: THandleChange,
+    classes: any,
+  ): ReactNode => {
     const filter = createFilterOptions<ISelectOption>();
     return (
-      <Grid item xs={3} key={item.field}>
+      <Grid item xs={12} md={6} key={item.field} className={classes.formItemContainer}>
         <Autocomplete
-          value={getValue(data, item) || ''}
+          value={getValue(data, item)}
           options={item.selectOptions!.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
           })}
           groupBy={item.groupBy ? option => option.label[0].toUpperCase() : undefined}
-          onChange={(event, newValue) => {
-            const handler = handleChange(item.field);
-            if (newValue) {
-              if (newValue.inputValue) {
-                handler({} as ChangeEvent<HTMLInputElement>, newValue.inputValue);
-              } else {
-                handler({} as ChangeEvent<HTMLInputElement>, newValue.value);
-              }
-            } else {
-              handler({} as ChangeEvent<HTMLInputElement>, undefined);
-            }
-          }}
+          onChange={(event, value) =>
+            handleChange(item.field, value ? (value.inputValue ? value.inputValue : value.value) : undefined)
+          }
           filterOptions={(options, params) => {
             const filtered = filter(options, params);
             const {inputValue} = params;
@@ -64,19 +61,11 @@ const formElements: IDictionary<TGetFormElements> = {
             }
             return filtered;
           }}
-          getOptionLabel={(option?: any) => {
-            console.log(typeof option);
-            if (typeof option === 'string') {
-              return option;
-            }
-            if (option.inputValue) {
-              return option.inputValue;
-            }
-            return option.label;
-          }}
+          getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue ? option.inputValue : option.label)}
           renderOption={(props, option) => <li {...props}>{option.label}</li>}
           renderInput={params => (<TextField required {...params} label={item.label}/>)}
           freeSolo
+          className={classes.formItem}
         />
       </Grid>
     );
@@ -85,15 +74,17 @@ const formElements: IDictionary<TGetFormElements> = {
     item: IFormItem,
     data: any,
     handleChange: THandleChange,
+    classes: any,
   ): ReactNode => (
-    <Grid item xs={3} key={item.field}>
+    <Grid item xs={12} md={6} key={item.field} className={classes.formItemContainer}>
       <TextField
         required
         select
         label={item.label}
-        value={getValue(data, item) || ''}
-        onChange={handleChange(item.field)}
+        value={getValue(data, item)}
+        onChange={event => handleChange(item.field, event.target.value)}
         variant="outlined"
+        className={classes.formItem}
       >
         {item.selectOptions!.map(option => (
           <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>
@@ -105,14 +96,16 @@ const formElements: IDictionary<TGetFormElements> = {
     item: IFormItem,
     data: any,
     handleChange: THandleChange,
+    classes: any,
   ): ReactNode => (
-    <Grid item xs={3} key={item.field}>
+    <Grid item xs={12} md={6} key={item.field} className={classes.formItemContainer}>
       <TextField
         required
         label={item.label}
-        value={getValue(data, item) || ''}
-        onChange={handleChange(item.field)}
+        value={getValue(data, item)}
+        onChange={event => handleChange(item.field, event.target.value)}
         variant="outlined"
+        className={classes.formItem}
       />
     </Grid>
   ),
@@ -122,11 +115,13 @@ const formGenerator = (
   items: IFormItem[],
   data: any,
   handleChange: THandleChange,
+  classes: any,
 ): ReactNode[] => items.map((item: IFormItem) => (
   formElements[item.elementType](
     item,
     data,
     handleChange,
+    classes,
   )
 ));
 
