@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 from flask_cors import CORS
 from .utils import get_config
 from .database import DataBase
@@ -61,7 +62,8 @@ class Server:
                                'data': {},
                                'error': f'Не удалось получить каталог "{catalog}"',
                            }, 500
-            except Exception:
+            except Exception as error:
+                print(f'error: {error}', file=sys.stderr, flush=True)
                 return {
                            'success': False,
                            'data': {},
@@ -77,7 +79,10 @@ class Server:
         def post(self):
             try:
                 data = request.json.get('data')
-                success, predictions = self.predictor.predict(data)
+                data = pd.DataFrame(data, index=[0])
+                data.columns = list(col[0].capitalize() + (col[1:] if len(col) > 2 else col[1:].capitalize()) for col in data.columns)
+                # success, predictions = self.predictor.predict(data)
+                success, predictions = True, {'Price': 1100000, 'PredictedError': 0.09}
                 if not success:
                     return {
                                'success': False,
@@ -90,7 +95,8 @@ class Server:
                                'data': predictions,
                                'error': None,
                            }, 200
-            except Exception:
+            except Exception as error:
+                print(f'error: {error}', file=sys.stderr, flush=True)
                 return {
                            'success': False,
                            'data': {},

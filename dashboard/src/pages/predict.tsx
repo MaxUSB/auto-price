@@ -76,7 +76,6 @@ interface IPredictState {
   catalogs: ICatalogs;
   predictedPrice: number | null;
   predictedError: number | null;
-  markLogo: string | null;
 }
 
 const Predict = () => {
@@ -86,7 +85,6 @@ const Predict = () => {
     car: {},
     catalogs: {},
     activeStep: 0,
-    markLogo: null,
     isLoading: false,
     predictedPrice: null,
     predictedError: null,
@@ -140,13 +138,13 @@ const Predict = () => {
     event.preventDefault();
     setState({...state, isLoading: true});
     const data = state.car;
-    const response = (await api('post', 'predict', {data, with_mark_logo: true})) as TResponse;
+    const response = (await api('post', 'predict', {data})) as TResponse;
     if (!response.success) {
       setState({...state, isLoading: false, error: {open: true, message: String(response.error!)}});
       return;
     }
     const r_data = response.data;
-    setState({...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError'], markLogo: r_data['Logo']})
+    setState({...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError']})
   };
 
   useEffect(() => {
@@ -185,7 +183,7 @@ const Predict = () => {
                 </Grid>
               </Grid>
             ) : (
-              <PredictResults predictedPrice={state.predictedPrice} predictedError={state.predictedError} mark={state.car.mark} markLogo={state.markLogo}/>
+              <PredictResults predictedPrice={state.predictedPrice} predictedError={state.predictedError} mark={state.car.mark}/>
             )}
           </Grid>
         </Stack>

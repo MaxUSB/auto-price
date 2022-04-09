@@ -15,6 +15,9 @@ const useStyles = makeStyles(() =>
       alignItems: 'center',
       justifyContent: 'center',
     },
+    logoImg: {
+      maxHeight: '100px',
+    },
   }),
 );
 
@@ -22,18 +25,19 @@ interface IPredictResultsProps {
   predictedPrice: number | null;
   predictedError: number | null;
   mark?: string;
-  markLogo: string | null;
 }
 
 const PredictResults = (props: IPredictResultsProps) => {
-  const {predictedPrice, predictedError, mark, markLogo} = props;
+  const {predictedPrice, predictedError, mark} = props;
   const classes = useStyles();
   let downRangeLimit = 0;
   let upRangeLimit = 0;
+  let markLinkPart = '';
 
   if (predictedPrice && predictedError) {
     downRangeLimit = predictedPrice - predictedPrice * predictedError;
     upRangeLimit = predictedPrice + predictedPrice * predictedError;
+    markLinkPart = mark!.toLowerCase().replace(' ', '-');
   }
 
   return (
@@ -41,7 +45,7 @@ const PredictResults = (props: IPredictResultsProps) => {
       {predictedPrice && predictedError ? (
         <Stack spacing={10}>
           <Grid item container className={classes.logo}>
-            <Avatar src={markLogo ? markLogo : ''} alt="Mark Logo" sx={{width: 100, height: 100}}/>
+            <img src={`//www.carlogos.org/car-logos/${markLinkPart}-logo.png`} alt="Логотип не найден" className={classes.logoImg}/>
             <Typography variant="h4" textAlign="center">{mark}</Typography>
           </Grid>
           <Grid item container xs={12}>
