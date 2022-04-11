@@ -62,7 +62,7 @@ const PredictResults = (props: IPredictResultsProps) => {
                   {`${downRangeLimit.toLocaleString('ru-RU')} - ${upRangeLimit.toLocaleString('ru-RU')}`}
                   <CurrencyRuble fontSize="large"/>
                 </Typography>
-                <Typography variant="h5" textAlign="center">возможный диапозон стоимости</Typography>
+                <Typography variant="h5" textAlign="center">возможный диапазон стоимости</Typography>
               </Stack>
             </Stack>
 

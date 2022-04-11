@@ -6,25 +6,22 @@ from .utils import get_config, save_data
 
 
 class Parser:
-    def __init__(self, start_price, end_price):
+    def __init__(self):
         self.url = ''
         self.config = get_config('parser')
 
-        self.start_price = [start_price, end_price / 2 + 1]
-        self.end_price = [end_price / 2, end_price]
-
-    def get_autoru_cars(self):
+    def get_autoru_cars(self, start_price, end_price, increment):
         self.url = 'https://auto.ru/-/ajax/desktop/listing/'
 
         parsed_cars_df = pd.DataFrame()
-        for i in range(len(self.start_price)):
-            print(f'for price interval {self.start_price[i]}...{self.end_price[i]}:')
+        while start_price < end_price:
+            print(f'for price interval {start_price}...{start_price + increment}:')
             print('getting page number...', end=' ')
             request_parameter = {
                 "category": "cars",
                 "section": "used",
-                "price_to": self.start_price[i],
-                "price_from": self.end_price[i],
+                "price_from": start_price,
+                "price_to": start_price + increment,
                 "page": 1,
                 "geo_id": [225],
             }
@@ -49,10 +46,6 @@ class Parser:
                         except:
                             car_dict['ID'] = None
                         try:
-                            car_dict['Color'] = car['color_hex']
-                        except:
-                            car_dict['Color'] = None
-                        try:
                             car_dict['Owners'] = car['documents']['owners_number']
                         except:
                             car_dict['Owners'] = None
@@ -64,10 +57,6 @@ class Parser:
                             car_dict['Year'] = car['documents']['year']
                         except:
                             car_dict['Year'] = None
-                        try:
-                            car_dict['YearTax'] = car['owner_expenses']['transport_tax']['tax_by_year']
-                        except:
-                            car_dict['YearTax'] = None
                         try:
                             car_dict['Price'] = car['price_info']['price']
                         except:
@@ -85,9 +74,9 @@ class Parser:
                         except:
                             car_dict['Mark'] = None
                         try:
-                            car_dict['IsLeftHand'] = car['vehicle_info']['steering_wheel'] == 'LEFT'
+                            car_dict['Model'] = car['vehicle_info']['model_info']['name']
                         except:
-                            car_dict['IsLeftHand'] = None
+                            car_dict['Model'] = None
                         try:
                             car_dict['HP'] = car['vehicle_info']['tech_param']['power']
                         except:
@@ -108,6 +97,10 @@ class Parser:
                             car_dict['GearType'] = car['vehicle_info']['tech_param']['gear_type']
                         except:
                             car_dict['GearType'] = None
+                        try:
+                            car_dict['PriceSegment'] = car['vehicle_info']['super_gen']['price_segment']
+                        except:
+                            car_dict['PriceSegment'] = None
                         parsed_cars.append(car_dict)
                 else:
                     print(f'\nerror: {response.status_code} status for page {page}', file=sys.stderr)
