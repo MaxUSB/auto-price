@@ -1,0 +1,18 @@
+{
+  "tasks": [
+    {
+      "name": "reteach_model",
+      "schedule": "* * * * *",
+      "subtasks": ["parse_data", "teach_predictor", "fill_catalogs"]
+    }, {
+      "name": "parse_data",
+      "command": "python {path}/run_parser.py -s 100000 -e 20000000"
+    }, {
+      "name": "teach_predictor",
+      "command": "python {path}/run_teacher.py"
+    }, {
+      "name": "fill_catalogs",
+      "command": "python {path}/run_catalog_filler.py"
+    }
+  ]
+}
