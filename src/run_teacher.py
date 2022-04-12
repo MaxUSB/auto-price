@@ -9,14 +9,14 @@ def run():
     if data is None:
         print('error: data is None', file=sys.stderr)
 
-    print('done.\nfit model =>')
+    print('done.\nfit model...')
     predictor = Predictor()
     success, error = predictor.fit(data)
     if not success:
         print(f'error: {error}', file=sys.stderr)
         return 1
 
-    print('<=\nstore model...', end=' ')
+    print('store model...', end=' ')
     success = predictor.store_model()
     if not success:
         return 1

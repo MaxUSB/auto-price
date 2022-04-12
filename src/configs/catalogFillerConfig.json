@@ -1,0 +1,36 @@
+{
+  "tables": [
+    {
+      "name": "cities",
+      "cols": {
+        "id": "serial primary key",
+        "city": "text UNIQUE"
+      }
+    },
+    {
+      "name": "marks",
+      "cols": {
+        "id": "serial primary key",
+        "mark": "text UNIQUE"
+      }
+    },
+    {
+      "name": "horsepower",
+      "cols": {
+        "id": "serial primary key",
+        "horsepower": "int",
+        "mark_id": "int"
+      },
+      "constraint": [
+        "horsepower",
+        "mark_id"
+      ],
+      "foreign_keys": [
+        {
+          "col": "mark_id",
+          "target": "marks"
+        }
+      ]
+    }
+  ]
+}

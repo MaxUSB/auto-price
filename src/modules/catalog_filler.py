@@ -1,48 +1,30 @@
+import sys
+from .utils import get_config
 from .database import DataBase
-from .utils import get_config, get_data
 
 
 class CatalogFiller:
-    def __init__(self, file_name, file_path):
-        self.cars = get_data(file_name, file_path)
-        self.config = get_config('catalog')
-        pass
-
-    def fill_catalogs(self):
-        try:
-            print('Connecting to database...')
-            db = DataBase(connect_data=get_config('db')['catalogs'])
-            print('Fill catalogs...')
-            self.__fill_marks(db)
-            self.__fill_cities(db)
-            self.__fill_horse_powers(db)
-            print('Done.')
-        except:
-            print('Connection failed')
+    def __init__(self):
+        self.config = get_config('catalogFiller')
+        self.db = DataBase(get_config('db')['catalogs'])
 
     def __fill_marks(self, db):
         marks = list(filter(lambda item: item['table_name'] == 'marks', self.config['tables']))[0]
         db.create_table(marks)
         cols_list = list(filter(lambda item: item['name'] != 'id', marks['cols']))
-        db.insert_table(marks, cols_list, self.__get_text_col_formatted_data('Mark'))
-
-    def __fill_capacities(self, db):
-        capacities = list(filter(lambda item: item['table_name'] == 'capacities', self.config['tables']))[0]
-        db.create_table(capacities)
-        cols_list = list(filter(lambda item: item['name'] != 'id', capacities['cols']))
-        db.insert_table(capacities, cols_list, self.__get_mark_formatted_data(db, ['Mark', 'Capacity']))
+        db.insert_data(marks, cols_list, self.__get_text_col_formatted_data('Mark'))
 
     def __fill_cities(self, db):
         cities = list(filter(lambda item: item['table_name'] == 'cities', self.config['tables']))[0]
         db.create_table(cities)
         cols_list = list(filter(lambda item: item['name'] != 'id', cities['cols']))
-        db.insert_table(cities, cols_list, self.__get_text_col_formatted_data('City'))
+        db.insert_data(cities, cols_list, self.__get_text_col_formatted_data('City'))
 
     def __fill_horse_powers(self, db):
         horse_powers = list(filter(lambda item: item['table_name'] == 'horse_powers', self.config['tables']))[0]
         db.create_table(horse_powers)
         cols_list = list(filter(lambda item: item['name'] != 'id', horse_powers['cols']))
-        db.insert_table(horse_powers, cols_list, self.__get_mark_formatted_data(db, ['Mark', 'HP']))
+        db.insert_data(horse_powers, cols_list, self.__get_mark_formatted_data(db, ['Mark', 'HP']))
 
     def __get_text_col_formatted_data(self, col):
         data = []
@@ -69,3 +51,20 @@ class CatalogFiller:
                     values.append(value.__str__())
             data.append(values)
         return data
+
+    def fill_catalogs(self, cars):
+        print('create catalogs if not exists...', end=' ')
+        success, error = self.db.create_tables(self.config['tables'])
+        if not success:
+            print(f'error: {error}', file=sys.stderr)
+            return 1
+
+        print('done.\ntruncate catalogs...', end=' ')
+        success, error = self.db.truncate_tables(list(map(lambda table: table['name'], self.config['tables'])))
+        if not success:
+            print(f'error: {error}', file=sys.stderr)
+            return 1
+
+        print('done.\nfill catalogs...', end=' ')
+
+        return 0

@@ -1,12 +1,14 @@
 from modules import CatalogFiller
+from modules.utils import get_data
 
 
 def run():
     rc = None
-    catalog_filler = CatalogFiller(file_name='autoru_learn.csv', file_path='raw')
+    catalog_filler = CatalogFiller()
 
-    print('AutoRu parsing...')
-    rc = catalog_filler.fill_catalogs()
+    print('AutoRu fill catalogs...')
+    cars = get_data('autoru_learn.csv', 'raw')
+    rc = catalog_filler.fill_catalogs(cars)
 
     return rc
 
