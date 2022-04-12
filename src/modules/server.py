@@ -28,7 +28,7 @@ class Server:
             cls.catalog_queries = {
                 'marks': 'SELECT mark FROM marks',
                 'cities': 'SELECT city FROM cities',
-                'mark_params': 'SELECT horse_power FROM marks m JOIN horse_powers hp ON m.id = hp.mark_id WHERE mark = :mark',
+                'mark_params': 'SELECT horsepower FROM marks m JOIN horsepower hp ON m.id = hp.mark_id WHERE mark = :mark',
             }
             cls.catalog_params = {
                 'marks': ['mark'],
