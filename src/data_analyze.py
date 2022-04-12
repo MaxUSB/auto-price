@@ -117,7 +117,8 @@ def run(only_models_compare=False):
     cities_id = cars[['City', 'CityID']].drop_duplicates()  # dict of cities
     cars['City'] = cars['CityID']
     cars.drop(columns=['CityID'], inplace=True)
-    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType', 'Pts'], drop_first=True)
+    cars.info()
+    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType', 'Pts'])
     print(cars.head())
 
     print(separator)
