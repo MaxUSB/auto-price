@@ -2,11 +2,11 @@
   "tasks": [
     {
       "name": "reteach_model",
-      "schedule": "* * * * *",
+      "schedule": "0 0 * * 1",
       "subtasks": ["parse_data", "teach_predictor", "fill_catalogs"]
     }, {
       "name": "parse_data",
-      "command": "python {path}/run_parser.py -s 100000 -e 20000000"
+      "command": "python {path}/run_parser.py"
     }, {
       "name": "teach_predictor",
       "command": "python {path}/run_teacher.py"

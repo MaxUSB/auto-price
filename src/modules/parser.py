@@ -114,6 +114,7 @@ class Parser:
             if not success:
                 return 1
             print('done.')
+            start_price += increment
 
         if parsed_cars_df.empty:
             print('error: no car was parsed', file=sys.stderr)
