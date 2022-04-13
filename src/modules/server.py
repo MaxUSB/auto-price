@@ -33,7 +33,7 @@ class Server:
             cls.catalog_params = {
                 'marks': ['mark'],
                 'cities': ['city'],
-                'mark_params': ['hp'],
+                'mark_params': ['horsepower'],
             }
             return cls
 

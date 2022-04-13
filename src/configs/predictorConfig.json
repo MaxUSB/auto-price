@@ -10,7 +10,7 @@
     "GearType": "one-hot",
     "Year": "none",
     "Mileage": "none",
-    "HP": "none",
+    "Horsepower": "none",
     "Price": "none"
   },
   "filters": {

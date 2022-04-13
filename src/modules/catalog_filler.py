@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 from .utils import get_config
 from .database import DataBase
 
@@ -8,49 +9,18 @@ class CatalogFiller:
         self.config = get_config('catalogFiller')
         self.db = DataBase(get_config('db')['catalogs'])
 
-    def __fill_marks(self, db):
-        marks = list(filter(lambda item: item['table_name'] == 'marks', self.config['tables']))[0]
-        db.create_table(marks)
-        cols_list = list(filter(lambda item: item['name'] != 'id', marks['cols']))
-        db.insert_data(marks, cols_list, self.__get_text_col_formatted_data('Mark'))
+    def __save_data_df(self, data, field, table_name):
+        to_save = pd.DataFrame(data[field].unique(), columns=[field.lower()])
+        success, error = self.db.insert_data(table_name, to_save)
+        return success, to_save, error
 
-    def __fill_cities(self, db):
-        cities = list(filter(lambda item: item['table_name'] == 'cities', self.config['tables']))[0]
-        db.create_table(cities)
-        cols_list = list(filter(lambda item: item['name'] != 'id', cities['cols']))
-        db.insert_data(cities, cols_list, self.__get_text_col_formatted_data('City'))
-
-    def __fill_horse_powers(self, db):
-        horse_powers = list(filter(lambda item: item['table_name'] == 'horse_powers', self.config['tables']))[0]
-        db.create_table(horse_powers)
-        cols_list = list(filter(lambda item: item['name'] != 'id', horse_powers['cols']))
-        db.insert_data(horse_powers, cols_list, self.__get_mark_formatted_data(db, ['Mark', 'HP']))
-
-    def __get_text_col_formatted_data(self, col):
-        data = []
-        for item in self.cars[col].unique():
-            data.append([f'\'{item}\''])
-        return data
-
-    def __get_mark_formatted_data(self, db, cols):
-        data = []
-        for i, row in self.cars[cols].drop_duplicates().iterrows():
-            values = []
-            for value in row:
-                if isinstance(value, str):
-                    select_query = f'''
-                                        SELECT id from marks
-                                        WHERE mark = '{value}'
-                                    '''
-                    try:
-                        auto = db.select_query(select_query)[1]['id'].values[0]
-                        values.append(auto.__str__())
-                    except:
-                        continue
-                elif isinstance(value, int):
-                    values.append(value.__str__())
-            data.append(values)
-        return data
+    def __save_dependent_data_df(self, base, data, field, table_name):
+        base_field = base.columns[0].capitalize()
+        rename_dict = {base_field: f'{base_field.lower()}_id', field: field.lower()}
+        to_save = data.drop_duplicates([base_field, field], ignore_index=True)[[base_field, field]]
+        to_save[base_field] = to_save[base_field].apply(lambda x: base.index[base[base_field.lower()] == x].tolist()[0])
+        to_save = to_save.rename(columns=rename_dict)
+        return self.db.insert_data(table_name, to_save)
 
     def fill_catalogs(self, cars):
         print('create catalogs if not exists...', end=' ')
@@ -65,6 +35,21 @@ class CatalogFiller:
             print(f'error: {error}', file=sys.stderr)
             return 1
 
-        print('done.\nfill catalogs...', end=' ')
+        print('done.\nfill base catalogs...', end=' ')
+        success, cities, error = self.__save_data_df(cars, 'City', 'cities')
+        if not success:
+            print(f'error: {error}', file=sys.stderr)
+            return 1
+        success, marks, error = self.__save_data_df(cars, 'Mark', 'marks')
+        if not success:
+            print(f'error: {error}', file=sys.stderr)
+            return 1
+
+        print('done.\nfill dependent catalogs...', end=' ')
+        success, error = self.__save_dependent_data_df(marks, cars, 'Horsepower', 'horsepower')
+        if not success:
+            print(f'error: {error}', file=sys.stderr)
+            return 1
+        print('done.')
 
         return 0

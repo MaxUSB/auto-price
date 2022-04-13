@@ -78,9 +78,9 @@ class Parser:
                         except:
                             car_dict['Model'] = None
                         try:
-                            car_dict['HP'] = car['vehicle_info']['tech_param']['power']
+                            car_dict['Horsepower'] = car['vehicle_info']['tech_param']['power']
                         except:
-                            car_dict['HP'] = None
+                            car_dict['Horsepower'] = None
                         try:
                             car_dict['Capacity'] = car['vehicle_info']['tech_param']['displacement']
                         except:

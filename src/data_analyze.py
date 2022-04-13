@@ -105,7 +105,7 @@ def run(only_models_compare=False):
 
     print(separator)
     print('ENCODED FEATURE')
-    cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'HP', 'Price']]
+    cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price']]
     cars['GearType'] = cars['GearType'].apply(lambda x: '4wd' if x == 'ALL_WHEEL_DRIVE' else '2wd')
     cars['Transmission'] = cars['Transmission'].apply(lambda x: 'mt' if x == 'MECHANICAL' else 'at')
     cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
