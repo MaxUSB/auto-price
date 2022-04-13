@@ -50,13 +50,12 @@ interface IError {
 }
 
 interface ICatalogs {
-  hpList?: string[];
+  horsepowerList?: string[];
   cityList?: string[];
   markList?: string[];
 }
 
 interface ICar {
-  hp?: string;
   pts?: string;
   city?: string;
   mark?: string;
@@ -65,6 +64,7 @@ interface ICar {
   mileage?: number;
   fuelType?: string;
   gearType?: string;
+  horsepower?: string;
   transmission?: string;
 }
 
@@ -81,7 +81,7 @@ interface IPredictState {
 const Predict = () => {
   const classes = useStyles();
   const [state, setState] = useState<IPredictState>({
-    // car: {city: 'Тюмень', mark: 'Honda', hp: '190', year: 2007, mileage: 240000, owners: 4, pts: 'ORIGINAL', fuelType: 'GASOLINE', gearType: 'FORWARD_CONTROL', transmission: 'MECHANICAL'},
+    // car: {city: 'Тюмень', mark: 'Honda', horsepower: '190', year: 2007, mileage: 240000, owners: 4, pts: 'ORIGINAL', fuelType: 'GASOLINE', gearType: 'FORWARD_CONTROL', transmission: 'MECHANICAL'},
     car: {},
     catalogs: {},
     activeStep: 0,
@@ -129,7 +129,7 @@ const Predict = () => {
   const carFormInit: IFormItem[] = carForm(
     state.catalogs.cityList || [],
     state.catalogs.markList || [],
-    state.catalogs.hpList || [],
+    state.catalogs.horsepowerList || [],
   );
 
   const handleChange = (item: string, value: any) => setState({...state, car: {...state.car, [item]: value}});

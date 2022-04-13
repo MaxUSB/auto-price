@@ -2,7 +2,7 @@ import {IFormItem, ISelectOption} from '.';
 
 let marksOptions: ISelectOption[] = [];
 let citiesOptions: ISelectOption[] = [];
-let hpsOptions: ISelectOption[] = [];
+let horsepowerOptions: ISelectOption[] = [];
 
 const ptsOptions: ISelectOption[] = [
   {label: 'Оригинал', value: 'ORIGINAL'},
@@ -24,10 +24,10 @@ const transmissionOptions: ISelectOption[] = [
   {label: 'Вариатор', value: 'VARIATOR'},
 ];
 
-const carForm = (cities: string[], marks: string[], hps: string[]): IFormItem[] => {
+const carForm = (cities: string[], marks: string[], horsepower: string[]): IFormItem[] => {
   citiesOptions = cities.map(city => ({label: city, value: city}));
   marksOptions = marks.map(mark => ({label: mark, value: mark}));
-  hpsOptions = hps.map(hp => ({label: hp, value: hp}));
+  horsepowerOptions = horsepower.map(horsepower => ({label: horsepower, value: horsepower}));
 
   return ([
     {
@@ -43,10 +43,10 @@ const carForm = (cities: string[], marks: string[], hps: string[]): IFormItem[] 
       selectOptions: marksOptions,
       groupBy: true,
     }, {
-      field: 'hp',
+      field: 'horsepower',
       elementType: 'autocomplete',
       label: 'Л.С.',
-      selectOptions: hpsOptions,
+      selectOptions: horsepowerOptions,
     }, {
       field: 'year',
       elementType: 'text',
