@@ -35,7 +35,7 @@ class Server:
                 'cities': ['city'],
                 'marks': ['mark'],
                 'models': ['model'],
-                'mark_params': ['horsepower'],
+                'model_params': ['horsepower'],
             }
             return cls
 

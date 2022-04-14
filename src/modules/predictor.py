@@ -101,6 +101,7 @@ class Predictor:
             false_binary_columns = [col for col in self.model.feature_names_in_ if col not in data.columns]
             if false_binary_columns:
                 data[false_binary_columns] = 0
+            data = data[self.model.feature_names_in_]
             print('done.\npredicting price...', end=' ')
             result[self.target] = int(self.model.predict(data)[0])
             print('done.\npredicting error...', end=' ')

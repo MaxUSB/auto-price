@@ -25,10 +25,11 @@ interface IPredictResultsProps {
   predictedPrice: number | null;
   predictedError: number | null;
   mark?: string;
+  model?: string;
 }
 
 const PredictResults = (props: IPredictResultsProps) => {
-  const {predictedPrice, predictedError, mark} = props;
+  const {predictedPrice, predictedError, mark, model} = props;
   const classes = useStyles();
   let downRangeLimit = 0;
   let upRangeLimit = 0;
@@ -46,7 +47,7 @@ const PredictResults = (props: IPredictResultsProps) => {
         <Stack spacing={10}>
           <Grid item container className={classes.logo}>
             <img src={`//www.carlogos.org/car-logos/${markLinkPart}-logo.png`} alt="Логотип не найден" className={classes.logoImg}/>
-            <Typography variant="h4" textAlign="center">{mark}</Typography>
+            <Typography variant="h4" textAlign="center">{mark} {model}</Typography>
           </Grid>
           <Grid item container xs={12}>
             <Stack spacing={10}>

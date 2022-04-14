@@ -50,9 +50,10 @@ interface IError {
 }
 
 interface ICatalogs {
-  horsepowerList?: string[];
   cityList?: string[];
   markList?: string[];
+  modelList?: string[];
+  horsepowerList?: string[];
 }
 
 interface ICar {
@@ -60,6 +61,7 @@ interface ICar {
   city?: string;
   mark?: string;
   year?: number;
+  model?: string;
   owners?: number;
   mileage?: number;
   fuelType?: string;
@@ -81,7 +83,7 @@ interface IPredictState {
 const Predict = () => {
   const classes = useStyles();
   const [state, setState] = useState<IPredictState>({
-    // car: {city: 'Тюмень', mark: 'Honda', horsepower: '190', year: 2007, mileage: 240000, owners: 4, pts: 'ORIGINAL', fuelType: 'GASOLINE', gearType: 'FORWARD_CONTROL', transmission: 'MECHANICAL'},
+    // car: {city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', year: 2007, mileage: 240000, owners: 4, pts: 'ORIGINAL', fuelType: 'GASOLINE', gearType: 'FORWARD_CONTROL', transmission: 'MECHANICAL'},
     car: {},
     catalogs: {},
     activeStep: 0,
@@ -91,10 +93,12 @@ const Predict = () => {
     error: {open: false, message: ''},
   });
 
-  const reloadCatalogs = async (mark: string | undefined) => {
+  const reloadCatalogs = async (mark: string | undefined, model: string | undefined) => {
     const tasks = [];
     if (mark) {
-      tasks.push(api('get', 'catalogs', {catalog: 'mark_params', mark}));
+      tasks.push(api('get', 'catalogs', {catalog: 'models', mark}));
+    } else if (model) {
+      tasks.push(api('get', 'catalogs', {catalog: 'model_params', model}));
     } else {
       tasks.push(api('get', 'catalogs', {catalog: 'marks', mark}));
       tasks.push(api('get', 'catalogs', {catalog: 'cities', mark}));
@@ -129,6 +133,7 @@ const Predict = () => {
   const carFormInit: IFormItem[] = carForm(
     state.catalogs.cityList || [],
     state.catalogs.markList || [],
+    state.catalogs.modelList || [],
     state.catalogs.horsepowerList || [],
   );
 
@@ -148,8 +153,12 @@ const Predict = () => {
   };
 
   useEffect(() => {
-    reloadCatalogs(state.car.mark);
+    reloadCatalogs(state.car.mark, undefined);
   }, [state.car.mark]);
+
+  useEffect(() => {
+    reloadCatalogs(undefined, state.car.model);
+  }, [state.car.model]);
 
   return (
     <Grid container className={classes.root}>
@@ -183,7 +192,7 @@ const Predict = () => {
                 </Grid>
               </Grid>
             ) : (
-              <PredictResults predictedPrice={state.predictedPrice} predictedError={state.predictedError} mark={state.car.mark}/>
+              <PredictResults predictedPrice={state.predictedPrice} predictedError={state.predictedError} mark={state.car.mark} model={state.car.model}/>
             )}
           </Grid>
         </Stack>
