@@ -2,6 +2,7 @@
   "target": "Price",
   "features": {
     "Mark": "custom",
+    "Model": "custom",
     "City": "custom",
     "Owners": "none",
     "Pts": "one-hot",

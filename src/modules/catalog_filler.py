@@ -15,12 +15,13 @@ class CatalogFiller:
         return success, to_save, error
 
     def __save_dependent_data_df(self, base, data, field, table_name):
-        base_field = base.columns[0].capitalize()
+        base_field = [col for col in base.columns if 'id' not in col][0].capitalize()
         rename_dict = {base_field: f'{base_field.lower()}_id', field: field.lower()}
         to_save = data.drop_duplicates([base_field, field], ignore_index=True)[[base_field, field]]
         to_save[base_field] = to_save[base_field].apply(lambda x: base.index[base[base_field.lower()] == x].tolist()[0])
         to_save = to_save.rename(columns=rename_dict)
-        return self.db.insert_data(table_name, to_save)
+        success, error = self.db.insert_data(table_name, to_save)
+        return success, to_save, error
 
     def fill_catalogs(self, cars):
         print('create catalogs if not exists...', end=' ')
@@ -46,7 +47,11 @@ class CatalogFiller:
             return 1
 
         print('done.\nfill dependent catalogs...', end=' ')
-        success, error = self.__save_dependent_data_df(marks, cars, 'Horsepower', 'horsepower')
+        success, models, error = self.__save_dependent_data_df(marks, cars, 'Model', 'models')
+        if not success:
+            print(f'error: {error}', file=sys.stderr)
+            return 1
+        success, horsepower, error = self.__save_dependent_data_df(models, cars, 'Horsepower', 'horsepower')
         if not success:
             print(f'error: {error}', file=sys.stderr)
             return 1

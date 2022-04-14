@@ -107,7 +107,6 @@ class Parser:
 
             print('done.\nsaving data...', end=' ')
             parsed_cars_df = parsed_cars_df.append(parsed_cars)
-            parsed_cars_df.drop_duplicates(['ID', 'Mark'], inplace=True)
             parsed_cars_df.drop(columns=['ID'], inplace=True)
             parsed_cars_df['Mark'] = parsed_cars_df['Mark'].apply(lambda x: 'LADA' if x == 'LADA (ВАЗ)' else x)
             success = save_data(parsed_cars_df, 'autoru_learn.csv', 'raw')

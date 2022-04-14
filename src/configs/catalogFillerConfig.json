@@ -15,20 +15,38 @@
       }
     },
     {
-      "name": "horsepower",
+      "name": "models",
       "cols": {
         "id": "serial primary key",
-        "horsepower": "int",
+        "model": "text",
         "mark_id": "int"
       },
       "constraint": [
-        "horsepower",
+        "model",
         "mark_id"
       ],
       "foreign_keys": [
         {
           "col": "mark_id",
           "target": "marks"
+        }
+      ]
+    },
+    {
+      "name": "horsepower",
+      "cols": {
+        "id": "serial primary key",
+        "horsepower": "int",
+        "model_id": "int"
+      },
+      "constraint": [
+        "horsepower",
+        "model_id"
+      ],
+      "foreign_keys": [
+        {
+          "col": "model_id",
+          "target": "models"
         }
       ]
     }

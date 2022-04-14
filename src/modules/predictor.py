@@ -32,6 +32,8 @@ class Predictor:
         for field in [k for k, v in self.features.items() if v == 'custom']:
             if field == 'Mark':
                 self.custom_encode_dicts[field] = data.groupby('Mark')['Price'].mean()
+            elif field == 'Model':
+                self.custom_encode_dicts[field] = data.groupby('Model')['Price'].mean()
             elif field == 'City':
                 cities = data[['City']].drop_duplicates()
                 cities['CityID'] = cities['City'].astype('category')

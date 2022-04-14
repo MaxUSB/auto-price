@@ -26,13 +26,15 @@ class Server:
         def init(cls, db_config):
             cls.db = DataBase(db_config['catalogs'])
             cls.catalog_queries = {
-                'marks': 'SELECT mark FROM marks',
                 'cities': 'SELECT city FROM cities',
-                'mark_params': 'SELECT horsepower FROM marks m JOIN horsepower hp ON m.id = hp.mark_id WHERE mark = :mark',
+                'marks': 'SELECT mark FROM marks',
+                'models': 'SELECT model FROM marks ma JOIN models mo on mo.mark_id = ma.id WHERE mark = :mark',
+                'model_params': 'SELECT horsepower FROM models m JOIN horsepower hp ON hp.model_id = m.id WHERE model = :model',
             }
             cls.catalog_params = {
-                'marks': ['mark'],
                 'cities': ['city'],
+                'marks': ['mark'],
+                'models': ['model'],
                 'mark_params': ['horsepower'],
             }
             return cls
@@ -41,13 +43,14 @@ class Server:
             try:
                 catalog = request.args.get('catalog')
                 mark = request.args.get('mark')
+                model = request.args.get('model')
                 if catalog is None:
                     return {
                                'success': False,
                                'data': {},
                                'error': 'Отсутствует параметр "catalog"',
                            }, 400
-                success, result, error = self.db.select_query(self.catalog_queries[catalog], {'mark': mark})
+                success, result, error = self.db.select_query(self.catalog_queries[catalog], {'mark': mark, 'model': model})
                 if success:
                     result = result.astype(str)
                     return {

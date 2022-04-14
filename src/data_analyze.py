@@ -52,7 +52,6 @@ def run(only_models_compare=False):
     print('DATAFRAME INFO')
     cars.info()
     cars.dropna(inplace=True)
-    cars['YearTax'] = cars['YearTax'].astype(int)
     cars['Owners'] = cars['Owners'].astype(str)
 
     if not only_models_compare:
@@ -105,13 +104,15 @@ def run(only_models_compare=False):
 
     print(separator)
     print('ENCODED FEATURE')
-    cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price']]
+    cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
     cars['GearType'] = cars['GearType'].apply(lambda x: '4wd' if x == 'ALL_WHEEL_DRIVE' else '2wd')
     cars['Transmission'] = cars['Transmission'].apply(lambda x: 'mt' if x == 'MECHANICAL' else 'at')
     cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
     cars['Owners'] = cars['Owners'].astype('int64')
     mark_avg_prices = cars.groupby('Mark', as_index=False)['Price'].mean()  # dict of Marks
     cars = cars.merge(mark_avg_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
+    model_avg_prices = cars.groupby('Model', as_index=False)['Price'].mean()  # dict of Models
+    cars = cars.merge(model_avg_prices, how='left', on='Model', suffixes=('', 'Mean')).drop(columns=['Model']).rename(columns={'PriceMean': 'Model'})
     cars['CityID'] = cars['City'].astype('category')
     cars['CityID'] = cars['CityID'].cat.codes
     cities_id = cars[['City', 'CityID']].drop_duplicates()  # dict of cities
