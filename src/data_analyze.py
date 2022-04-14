@@ -163,6 +163,13 @@ def run(only_models_compare=False):
         'ElasticNet': en_metrics,
     }, index=['MSE', 'RMSE', 'R2']).T.sort_values(by=['R2', 'RMSE', 'MSE'], ascending=[False, True, True])
     print(metrics_df)
+
+    print(separator)
+    print('DESCRIBE RIDGE')
+    x_test['PREDICTIONS'] = ridge_pred
+    x_test['REAL'] = y_test
+    x_test['RELATIVE ERROR'] = x_test.apply(lambda x: abs(x['REAL'] - x['PREDICTIONS']) / x['REAL'], axis=1)
+    print(x_test.describe([.25, .5, .75, .9, .95, .98]))
     print(separator)
 
 
