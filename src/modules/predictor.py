@@ -95,10 +95,12 @@ class Predictor:
             data = self.__filter_data(data.copy())
             print('done.\nsetting custom field encode dicts...', end=' ')
             self.__set_custom_field_encode_dicts(data)
-            print('done.\nencoding fields...', end=' ')
-            data = self.__encode_fields(data.copy())
             print('done.\nsplitting data by segment...', end=' ')
             data_e, data_m, data_p = self.__segment_split(data)
+            print('done.\nencoding fields...', end=' ')
+            data_e = self.__encode_fields(data_e.copy())
+            data_m = self.__encode_fields(data_m.copy())
+            data_p = self.__encode_fields(data_p.copy())
             print('done.\ncreating training pools...', end=' ')
             x_e = data_e.drop(columns=self.target)
             x_m = data_m.drop(columns=self.target)
@@ -141,10 +143,11 @@ class Predictor:
             data = data[self.features.keys()]
             print('filtering data...', end=' ')
             data = self.__filter_data(data.copy())
+            print('done.\ngetting segment model...', end=' ')
+            model, error_model = self.__get_segment_model(data['Model'].iloc[0])
             print('done.\nencoding fields...', end=' ')
             data = self.__encode_fields(data.copy())
             data.drop(columns=self.target, inplace=True)
-            model, error_model = self.__get_segment_model(data['Model'].iloc[0])
             false_binary_columns = [col for col in model.feature_names_in_ if col not in data.columns]
             if false_binary_columns:
                 data[false_binary_columns] = 0

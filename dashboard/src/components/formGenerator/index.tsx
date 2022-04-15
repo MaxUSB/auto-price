@@ -1,6 +1,7 @@
 import {IDictionary} from "../../utils/types";
 import React, {ReactNode} from 'react';
 import {Grid, Autocomplete, TextField, createFilterOptions, MenuItem} from "@mui/material";
+import {isNumber} from "util";
 
 export type THandleChange = (item: string, value: any) => void;
 
@@ -40,8 +41,14 @@ const formElements: IDictionary<TGetFormElements> = {
         <Autocomplete
           value={getValue(data, item)}
           options={item.selectOptions!.sort((a, b) => {
-            if (a.label > b.label) return 1;
-            if (a.label < b.label) return -1;
+            let aLabel: number | string = a.label;
+            let bLabel: number | string = b.label;
+            if (!isNaN(parseInt(a.label)) && !isNaN(parseInt(b.label))) {
+              aLabel = parseInt(a.label)
+              bLabel = parseInt(b.label)
+            }
+            if (aLabel > bLabel) return 1;
+            if (aLabel < bLabel) return -1;
             return 0;
           })}
           groupBy={item.groupBy ? option => option.label[0].toUpperCase() : undefined}
