@@ -12,7 +12,8 @@
     "Year": "none",
     "Mileage": "none",
     "Horsepower": "none",
-    "Price": "none"
+    "Price": "none",
+    "PriceSegment": "none"
   },
   "filters": {
     "GearType": {
