@@ -82,7 +82,7 @@ def run(only_models_compare=False):
         print('CAT FEATURES VS PRICE PLOTS')
         grid_place = 1
         plt.figure(figsize=(30, 40))
-        exclude_cat_features = ['Mark', 'City']
+        exclude_cat_features = ['City', 'Mark', 'Model', 'PriceSegment']
         cat_features = [x for x in list(cars.select_dtypes(include=['object', 'bool']).columns) if x not in exclude_cat_features]
         for cat_feature in cat_features:
             build_cat_feature_plot(cat_feature, grid_place)
@@ -94,7 +94,7 @@ def run(only_models_compare=False):
         print('NUM FEATURES VS PRICE PLOTS')
         grid_place = 1
         plt.figure(figsize=(20, 20))
-        exclude_num_features = ['Price']
+        exclude_num_features = ['Capacity', 'Price']
         num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
         for num_feature in num_features:
             build_num_feature_plot(num_feature, grid_place)
