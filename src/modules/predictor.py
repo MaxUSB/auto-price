@@ -1,6 +1,7 @@
 import sys
 import pandas as pd
 from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor
 from .utils import get_config, get_data, save_data
 
 
@@ -9,7 +10,6 @@ class Predictor:
         self.config = get_config('predictor')
         self.target = self.config['target']
         self.features = self.config['features']
-        self.filters = self.config['filters']
 
         self.model_e = None
         self.model_m = None
@@ -19,19 +19,6 @@ class Predictor:
         self.error_model_p = None
         self.custom_encode_dicts = {}
         self.segments = pd.DataFrame()
-
-    def __filter_data(self, data):
-        for field in self.filters.keys():
-            filter_params = self.filters[field]
-            if filter_params['filter_type'] == 'binary_union':
-                data[field] = data[field].apply(
-                    lambda x: filter_params['true_value'] if x in filter_params['condition_values'] else filter_params['false_value']
-                )
-            elif filter_params['filter_type'] == 'simple_filter':
-                data = data[data[field].isin(filter_params['values'])]
-            else:
-                print(f"error: invalid filter type {filter_params['filter_type']}", file=sys.stderr)
-        return data
 
     def __set_custom_field_encode_dicts(self, data):
         for field in [k for k, v in self.features.items() if v == 'custom']:
@@ -91,9 +78,7 @@ class Predictor:
     def fit(self, data):
         try:
             data = data[self.features.keys()]
-            print('filtering data...', end=' ')
-            data = self.__filter_data(data.copy())
-            print('done.\nsetting custom field encode dicts...', end=' ')
+            print('setting custom field encode dicts...', end=' ')
             self.__set_custom_field_encode_dicts(data)
             print('done.\nsplitting data by segment...', end=' ')
             data_e, data_m, data_p = self.__segment_split(data)
@@ -109,9 +94,9 @@ class Predictor:
             y_m = data_m[self.target]
             y_p = data_p[self.target]
             print('done.\ncreating models...', end=' ')
-            self.model_e = Ridge()
-            self.model_m = Ridge()
-            self.model_p = Ridge()
+            self.model_e = RandomForestRegressor(random_state=369)
+            self.model_m = RandomForestRegressor(random_state=369)
+            self.model_p = RandomForestRegressor(random_state=369)
             print('done.\ntraining models...', end=' ')
             self.model_e.fit(x_e, y_e)
             self.model_m.fit(x_m, y_m)
@@ -123,9 +108,9 @@ class Predictor:
             error_df_e['error'] = error_df_e.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
             error_df_m['error'] = error_df_m.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
             error_df_p['error'] = error_df_p.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
-            self.error_model_e = Ridge()
-            self.error_model_m = Ridge()
-            self.error_model_p = Ridge()
+            self.error_model_e = RandomForestRegressor(random_state=369)
+            self.error_model_m = RandomForestRegressor(random_state=369)
+            self.error_model_p = RandomForestRegressor(random_state=369)
             print('done.\ntraining error models...', end=' ')
             self.error_model_e.fit(x_e, error_df_e['error'])
             self.error_model_m.fit(x_m, error_df_m['error'])
@@ -141,9 +126,7 @@ class Predictor:
             data[self.target] = 0
             data['PriceSegment'] = 'UNKNOWN'
             data = data[self.features.keys()]
-            print('filtering data...', end=' ')
-            data = self.__filter_data(data.copy())
-            print('done.\ngetting segment model...', end=' ')
+            print('getting segment model...', end=' ')
             model, error_model = self.__get_segment_model(data['Model'].iloc[0])
             print('done.\nencoding fields...', end=' ')
             data = self.__encode_fields(data.copy())
@@ -155,7 +138,8 @@ class Predictor:
             print('done.\npredicting price...', end=' ')
             result[self.target] = int(model.predict(data)[0])
             print('done.\npredicting error...', end=' ')
-            result[self.target] += int(result[self.target] * abs(round(error_model.predict(data)[0], 2)))
+            print(int(result[self.target] * abs(round(error_model.predict(data)[0], 2))))
+            result['PredictedError'] = int(result[self.target] * abs(round(error_model.predict(data)[0], 2)))
             print('done.')
             return True, result
         except Exception as e:

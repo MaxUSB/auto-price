@@ -1,7 +1,7 @@
 import React from "react";
 import {createStyles, makeStyles} from '@mui/styles';
+import {Grid, Stack, Typography} from '@mui/material';
 import CurrencyRuble from '@mui/icons-material/CurrencyRuble';
-import {Grid, Avatar, Stack, Typography} from "@mui/material";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -23,18 +23,19 @@ const useStyles = makeStyles(() =>
 
 interface IPredictResultsProps {
   predictedPrice: number | null;
+  predictedError: number | null;
   mark?: string;
   model?: string;
 }
 
 const PredictResults = (props: IPredictResultsProps) => {
-  const {predictedPrice, mark, model} = props;
+  const {predictedPrice, predictedError, mark, model} = props;
   const classes = useStyles();
   let markLinkPart = mark ? mark.toLowerCase().replace(' ', '-') : '';
 
   return (
     <Grid container className={classes.root}>
-      {predictedPrice ? (
+      {predictedPrice && predictedError ? (
         <Stack spacing={10}>
           <Grid item container className={classes.logo}>
             <img src={`//www.carlogos.org/car-logos/${markLinkPart}-logo.png`} alt="Логотип не найден" className={classes.logoImg}/>
@@ -48,6 +49,13 @@ const PredictResults = (props: IPredictResultsProps) => {
                   <CurrencyRuble fontSize="large"/>
                 </Typography>
                 <Typography variant="h5" textAlign="center">рекомендуемая стоимость по вашим параметрам</Typography>
+              </Stack>
+              <Stack spacing={2}>
+                <Typography variant="h3" textAlign="center">
+                  {`${(predictedPrice - predictedError).toLocaleString('ru-RU')} - ${(predictedPrice + predictedError).toLocaleString('ru-RU')}`}
+                  <CurrencyRuble fontSize="large"/>
+                </Typography>
+                <Typography variant="h5" textAlign="center">возможный диапозон стоимости</Typography>
               </Stack>
             </Stack>
 

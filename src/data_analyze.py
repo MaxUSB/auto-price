@@ -3,25 +3,26 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from modules.utils import get_data
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 
-cars = get_data('autoru_learn.csv', 'raw')
+cars = get_data('autoru_learn_full.csv', 'raw')
 separator = '======================================================================================'
 
 
 def build_cat_feature_plot(x, grid_place):
-    plt.subplot(7, 2, grid_place)
+    plt.subplot(1, 2, grid_place)
     plt.title(x)
     sns.countplot(data=cars, x=x)
-    plt.subplot(7, 2, grid_place + 1)
+    plt.subplot(1, 2, grid_place + 1)
     plt.title(f'{x} vs Price')
     sns.boxplot(x=cars[x], y=cars.Price)
 
 
 def build_num_feature_plot(x, grid_place):
-    plt.subplot(3, 2, grid_place)
+    plt.subplot(2, 2, grid_place)
     plt.scatter(x=cars[x], y=cars.Price)
     plt.title(f'{x} vs Price')
     plt.ylabel('Price')
@@ -47,12 +48,11 @@ def build_compare_metrics(prediction, y):
 
 def run(only_models_compare=False):
     global cars
-
-    print(separator)
-    print('DATAFRAME INFO')
-    cars.info()
     cars.dropna(inplace=True)
     cars['Owners'] = cars['Owners'].astype(str)
+    # cars = cars[cars['PriceSegment'] == 'ECONOMY']
+    cars = cars[['Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
+    # cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
 
     if not only_models_compare:
         print(separator)
@@ -94,7 +94,7 @@ def run(only_models_compare=False):
         print('NUM FEATURES VS PRICE PLOTS')
         grid_place = 1
         plt.figure(figsize=(20, 20))
-        exclude_num_features = ['Capacity', 'Price']
+        exclude_num_features = ['Price']
         num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
         for num_feature in num_features:
             build_num_feature_plot(num_feature, grid_place)
@@ -104,11 +104,10 @@ def run(only_models_compare=False):
 
     print(separator)
     print('ENCODED FEATURE')
-    # cars = cars[cars['PriceSegment'] == 'PREMIUM']
-    cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
-    cars['GearType'] = cars['GearType'].apply(lambda x: '4wd' if x == 'ALL_WHEEL_DRIVE' else '2wd')
-    cars['Transmission'] = cars['Transmission'].apply(lambda x: 'mt' if x == 'MECHANICAL' else 'at')
-    cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
+    # cars['GearType'] = cars['GearType'].apply(lambda x: '4wd' if x == 'ALL_WHEEL_DRIVE' else '2wd')
+    # cars['Transmission'] = cars['Transmission'].apply(lambda x: 'mt' if x == 'MECHANICAL' else 'at')
+    # cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
+    # cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType', 'Pts'])
     cars['Owners'] = cars['Owners'].astype('int64')
     mark_avg_prices = cars.groupby('Mark', as_index=False)['Price'].mean()  # dict of Marks
     cars = cars.merge(mark_avg_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
@@ -120,12 +119,14 @@ def run(only_models_compare=False):
     cars['City'] = cars['CityID']
     cars.drop(columns=['CityID'], inplace=True)
     cars.info()
-    cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType', 'Pts'])
     print(cars.head())
 
     print(separator)
     print('CORRELATION PLOT')
+    cars = cars[['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model']]
+    # cars = cars[['Price', 'Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Model']]
     plt.figure(figsize=(30, 25))
+    sns.set(font_scale=4)
     sns.heatmap(cars.corr(method='spearman'), annot=True)
     plt.show()
 
@@ -138,18 +139,23 @@ def run(only_models_compare=False):
     lasso_model = Lasso()
     ridge_model = Ridge()
     en_model = ElasticNet()
+    rf_model = RandomForestRegressor(random_state=369)
     lr_model.fit(x_train, y_train)
     lasso_model.fit(x_train, y_train)
     ridge_model.fit(x_train, y_train)
     en_model.fit(x_train, y_train)
+    rf_model.fit(x_train, y_train)
     lr_pred = lr_model.predict(x_test)
     lasso_pred = lasso_model.predict(x_test)
     ridge_pred = ridge_model.predict(x_test)
     en_pred = en_model.predict(x_test)
+    rf_pred = rf_model.predict(x_test)
+    sns.set(font_scale=1)
     build_compare_plot(lr_pred, y_test, 'LinearRegression')
     build_compare_plot(lasso_pred, y_test, 'Lasso')
     build_compare_plot(ridge_pred, y_test, 'Ridge')
     build_compare_plot(en_pred, y_test, 'ElasticNet')
+    build_compare_plot(rf_pred, y_test, 'RandomForest')
 
     print(separator)
     print('MODELS COMPARE METRICS (best - first, worst - last)')
@@ -157,20 +163,21 @@ def run(only_models_compare=False):
     lasso_metrics = build_compare_metrics(lasso_pred, y_test)
     ridge_metrics = build_compare_metrics(ridge_pred, y_test)
     en_metrics = build_compare_metrics(en_pred, y_test)
+    rf_metrics = build_compare_metrics(rf_pred, y_test)
     metrics_df = pd.DataFrame({
         'LinearRegression': lr_metrics,
         'Lasso': lasso_metrics,
         'Ridge': ridge_metrics,
         'ElasticNet': en_metrics,
-    }, index=['MSE', 'RMSE', 'R2']).T.sort_values(by=['R2', 'RMSE', 'MSE'], ascending=[False, True, True])
+        'RandomForest': rf_metrics,
+    }, index=['MSE', 'RMSE', 'R2']).T.sort_values(by='R2', ascending=False)
     print(metrics_df)
 
     print(separator)
-    print('DESCRIBE RIDGE')
-    x_test['PREDICTIONS'] = ridge_pred
-    x_test['REAL'] = y_test
-    x_test['RELATIVE ERROR'] = x_test.apply(lambda x: abs(x['REAL'] - x['PREDICTIONS']) / x['REAL'], axis=1)
-    print(x_test.describe([.25, .5, .75, .9, .95, .98]))
+    print('FEATURE IMPORTANCE RANDOM FOREST')
+    feature_importance = dict(zip(rf_model.feature_names_in_, rf_model.feature_importances_))
+    for feature, value in feature_importance.items():
+        print(f'{feature} -> {round(value, 2)}')
     print(separator)
 
 

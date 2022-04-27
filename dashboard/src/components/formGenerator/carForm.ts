@@ -5,26 +5,6 @@ let modelsOptions: ISelectOption[] = [];
 let citiesOptions: ISelectOption[] = [];
 let horsepowerOptions: ISelectOption[] = [];
 
-const ptsOptions: ISelectOption[] = [
-  {label: 'Оригинал', value: 'ORIGINAL'},
-  {label: 'Дубликат', value: 'DUPLICATE'},
-];
-const fuelTypeOptions: ISelectOption[] = [
-  {label: 'Бензин', value: 'GASOLINE'},
-  {label: 'Дизель', value: 'DIESEL'},
-];
-const gearTypeOptions: ISelectOption[] = [
-  {label: 'Передний', value: 'FORWARD_CONTROL'},
-  {label: 'Задний', value: 'REAR_DRIVE'},
-  {label: 'Полный', value: 'ALL_WHEEL_DRIVE'},
-];
-const transmissionOptions: ISelectOption[] = [
-  {label: 'Механика', value: 'MECHANICAL'},
-  {label: 'Автомат', value: 'AUTOMATIC'},
-  {label: 'Робот', value: 'ROBOT'},
-  {label: 'Вариатор', value: 'VARIATOR'},
-];
-
 const carForm = (cities: string[], marks: string[], models: string[], horsepower: string[]): IFormItem[] => {
   citiesOptions = cities.map(city => ({label: city, value: city}));
   marksOptions = marks.map(mark => ({label: mark, value: mark}));
@@ -67,26 +47,6 @@ const carForm = (cities: string[], marks: string[], models: string[], horsepower
       field: 'owners',
       elementType: 'text',
       label: 'Кол-во владельцев',
-    }, {
-      field: 'pts',
-      elementType: 'select',
-      label: 'ПТС',
-      selectOptions: ptsOptions,
-    }, {
-      field: 'fuelType',
-      elementType: 'select',
-      label: 'Тип топлива',
-      selectOptions: fuelTypeOptions,
-    }, {
-      field: 'gearType',
-      elementType: 'select',
-      label: 'Привод',
-      selectOptions: gearTypeOptions,
-    }, {
-      field: 'transmission',
-      elementType: 'select',
-      label: 'Тип КПП',
-      selectOptions: transmissionOptions,
     },
   ]);
 };
