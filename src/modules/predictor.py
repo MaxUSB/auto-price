@@ -1,6 +1,5 @@
 import sys
 import pandas as pd
-from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestRegressor
 from .utils import get_config, get_data, save_data
 
@@ -19,6 +18,7 @@ class Predictor:
         self.error_model_p = None
         self.custom_encode_dicts = {}
         self.segments = pd.DataFrame()
+        self.cars = pd.DataFrame()
 
     def __set_custom_field_encode_dicts(self, data):
         for field in [k for k, v in self.features.items() if v == 'custom']:
@@ -122,7 +122,7 @@ class Predictor:
 
     def predict(self, data):
         try:
-            result = {}
+            result = {'Similar': self.cars[(self.cars['Mark'] == data['Mark']) & (self.cars['Model'] == data['Model'])]}
             data[self.target] = 0
             data['PriceSegment'] = 'UNKNOWN'
             data = data[self.features.keys()]
@@ -171,4 +171,5 @@ class Predictor:
         self.error_model_p = model_data['error_model_p']
         self.custom_encode_dicts = model_data['custom_encode_dicts']
         self.segments = model_data['segments']
+        self.cars = get_data('autoru_learn.csv', 'raw')
         return True
