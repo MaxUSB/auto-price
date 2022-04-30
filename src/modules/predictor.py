@@ -122,7 +122,11 @@ class Predictor:
 
     def predict(self, data):
         try:
-            result = {'Similar': self.cars[(self.cars['Mark'] == data['Mark']) & (self.cars['Model'] == data['Model'])]}
+            result = {
+                'Similar': self.cars[
+                    (self.cars['Mark'] == data['Mark'].iloc[0]) & (self.cars['Model'] == data['Model'].iloc[0])
+                    ][self.features.keys()].to_dict('records')[:10]
+            }
             data[self.target] = 0
             data['PriceSegment'] = 'UNKNOWN'
             data = data[self.features.keys()]

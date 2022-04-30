@@ -57,17 +57,13 @@ interface ICatalogs {
 }
 
 interface ICar {
-  pts?: string;
   city?: string;
   mark?: string;
   year?: number;
   model?: string;
   owners?: number;
   mileage?: number;
-  fuelType?: string;
-  gearType?: string;
   horsepower?: string;
-  transmission?: string;
 }
 
 interface IPredictState {
@@ -78,19 +74,21 @@ interface IPredictState {
   catalogs: ICatalogs;
   predictedPrice: number | null;
   predictedError: number | null;
+  similarCars: any[];
 }
 
 const Predict = () => {
   const classes = useStyles();
   const [state, setState] = useState<IPredictState>({
-    car: {city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', year: 2007, mileage: 240000, owners: 4},
+    // car: {city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', year: 2007, mileage: 240000, owners: 4},
     // car: {city: 'Тюмень', mark: 'Chevrolet', model: 'Aveo', horsepower: '101', year: 2011, mileage: 120000, owners: 2},
-    // car: {},
+    car: {},
     catalogs: {},
     activeStep: 0,
     isLoading: false,
     predictedPrice: null,
     predictedError: null,
+    similarCars: [],
     error: {open: false, message: ''},
   });
 
@@ -150,7 +148,7 @@ const Predict = () => {
       return;
     }
     const r_data = response.data;
-    setState({...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError']})
+    setState({...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError'], similarCars: r_data['Similar']})
   };
 
   useEffect(() => {
@@ -193,7 +191,13 @@ const Predict = () => {
                 </Grid>
               </Grid>
             ) : (
-              <PredictResults predictedPrice={state.predictedPrice} predictedError={state.predictedError} mark={state.car.mark} model={state.car.model}/>
+              <PredictResults
+                predictedPrice={state.predictedPrice}
+                predictedError={state.predictedError}
+                similarCars={state.similarCars}
+                mark={state.car.mark}
+                model={state.car.model}
+              />
             )}
           </Grid>
         </Stack>
