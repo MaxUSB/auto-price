@@ -1,11 +1,11 @@
 import api from '../utils/api';
-import {createStyles, makeStyles} from '@mui/styles';
-import {IDictionary, TResponse} from '../utils/types';
+import { createStyles, makeStyles } from '@mui/styles';
+import { IDictionary, TResponse } from '../utils/types';
 import carForm from "../components/formGenerator/carForm";
 import PredictResults from '../components/PredictResults';
-import React, {FormEvent, useEffect, useState} from 'react';
-import formGenerator, {IFormItem} from '../components/formGenerator';
-import {Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Backdrop, CircularProgress, Avatar, Typography, Link, Alert} from '@mui/material';
+import React, { FormEvent, useEffect, useState } from 'react';
+import formGenerator, { IFormItem } from '../components/formGenerator';
+import { Button, Grid, Stepper, Step, StepLabel, Stack, Snackbar, Backdrop, CircularProgress, Avatar, Typography, Link, Alert } from '@mui/material';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -89,21 +89,21 @@ const Predict = () => {
     predictedPrice: null,
     predictedError: null,
     similarCars: [],
-    error: {open: false, message: ''},
+    error: { open: false, message: '' },
   });
 
   const reloadCatalogs = async (mark: string | undefined, model: string | undefined) => {
     const tasks = [];
     if (mark) {
-      tasks.push(api('get', 'catalogs', {catalog: 'models', mark}));
+      tasks.push(api('get', 'catalogs', { catalog: 'models', mark }));
     } else if (model) {
-      tasks.push(api('get', 'catalogs', {catalog: 'model_params', model}));
+      tasks.push(api('get', 'catalogs', { catalog: 'model_params', model }));
     } else {
-      tasks.push(api('get', 'catalogs', {catalog: 'marks', mark}));
-      tasks.push(api('get', 'catalogs', {catalog: 'cities', mark}));
+      tasks.push(api('get', 'catalogs', { catalog: 'marks', mark }));
+      tasks.push(api('get', 'catalogs', { catalog: 'cities', mark }));
     }
     const responses = await Promise.all(tasks);
-    const catalogs: IDictionary<string[]> = {...state.catalogs};
+    const catalogs: IDictionary<string[]> = { ...state.catalogs };
     const errors: string[] = [];
     responses.forEach((response: TResponse) => {
       if (!response.success) {
@@ -115,19 +115,19 @@ const Predict = () => {
       }
     });
     if (errors) {
-      setState({...state, catalogs, error: {open: true, message: errors.join('\n')}});
+      setState({ ...state, catalogs, error: { open: true, message: errors.join('\n') } });
     } else {
-      setState({...state, catalogs});
+      setState({ ...state, catalogs });
     }
   };
 
   const handleCloseNotification = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason !== 'clickaway') {
-      setState({...state, error: {...state.error, open: false}});
+      setState({ ...state, error: { ...state.error, open: false } });
     }
   };
 
-  const handleChangeStep = (activeStep: number) => () => setState({...state, activeStep});
+  const handleChangeStep = (activeStep: number) => () => setState({ ...state, activeStep });
 
   const carFormInit: IFormItem[] = carForm(
     state.catalogs.cityList || [],
@@ -136,19 +136,19 @@ const Predict = () => {
     state.catalogs.horsepowerList || [],
   );
 
-  const handleChange = (item: string, value: any) => setState({...state, car: {...state.car, [item]: value}});
+  const handleChange = (item: string, value: any) => setState({ ...state, car: { ...state.car, [item]: value } });
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    setState({...state, isLoading: true});
+    setState({ ...state, isLoading: true });
     const data = state.car;
-    const response = (await api('post', 'predict', {data})) as TResponse;
+    const response = (await api('post', 'predict', { data })) as TResponse;
     if (!response.success) {
-      setState({...state, isLoading: false, error: {open: true, message: String(response.error!)}});
+      setState({ ...state, isLoading: false, error: { open: true, message: String(response.error!) } });
       return;
     }
     const r_data = response.data;
-    setState({...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError'], similarCars: r_data['Similar']})
+    setState({ ...state, isLoading: false, activeStep: 1, predictedPrice: r_data['Price'], predictedError: r_data['PredictedError'], similarCars: r_data['Similar'] })
   };
 
   useEffect(() => {
@@ -164,9 +164,9 @@ const Predict = () => {
       <Grid container item xs={10} direction="column" className={classes.content}>
         <Stack spacing={5} overflow="auto">
           <Grid item xs={12}>
-            <Link href="/" style={{color: 'black', textDecoration: 'none'}}>
+            <Link href="/" style={{ color: 'black', textDecoration: 'none' }}>
               <Grid item container className={classes.logo}>
-                <Avatar src="logo.png" alt="Auto Price" sx={{width: 40, height: 40}}/>
+                <Avatar src="logo.png" alt="Auto Price" sx={{ width: 40, height: 40 }}/>
                 <Typography variant="h4" textAlign="center">auto-price</Typography>
               </Grid>
             </Link>
@@ -203,7 +203,7 @@ const Predict = () => {
         </Stack>
       </Grid>
       <Backdrop open={state.isLoading}>
-        <CircularProgress sx={{color: "#23D5ABFF"}}/>
+        <CircularProgress sx={{ color: "#23D5ABFF" }}/>
       </Backdrop>
       {state.error.message ? (
         <Snackbar open={state.error.open} autoHideDuration={4000} onClose={handleCloseNotification} anchorOrigin={{ vertical: "top", horizontal: "left" }}>

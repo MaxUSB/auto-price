@@ -1,9 +1,9 @@
 import 'chart.js/auto';
 import React from "react";
 import LineChart from './LineChart';
-import {createStyles, makeStyles} from '@mui/styles';
-import {Grid, Stack, Typography} from '@mui/material';
-import {CurrencyRuble} from '@mui/icons-material';
+import { createStyles, makeStyles } from '@mui/styles';
+import { Grid, Stack, Typography } from '@mui/material';
+import { CurrencyRuble } from '@mui/icons-material';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -36,9 +36,9 @@ interface IPredictResultsProps {
 }
 
 const PredictResults = (props: IPredictResultsProps) => {
-  const {predictedPrice, predictedError, similarCars, mark, model} = props;
+  const { predictedPrice, predictedError, similarCars, mark, model } = props;
   const classes = useStyles();
-  let markLinkPart = mark ? mark.toLowerCase().replace(' ', '-') : '';
+  const markLinkPart = mark ? mark.toLowerCase().replace(' ', '-') : '';
 
   return (
     <Grid container className={classes.root}>

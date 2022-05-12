@@ -1,4 +1,4 @@
-import {TResponse} from './types';
+import { TResponse } from './types';
 import fetch from 'isomorphic-unfetch';
 import queryString from 'query-string';
 
@@ -19,15 +19,15 @@ const api = (
     body,
   })
     .then(async response => (
-      {status: response.status, result: await response.json()}
+      { status: response.status, result: await response.json() }
     ))
-    .then(({status, result}) => {
+    .then(({ status, result }) => {
       if (status !== 200 || result.success === false) throw new Error(result.error || 'error in api response');
       resolve(result);
     })
     .catch(error => {
       console.error(error);
-      resolve({success: false, data: {}, error});
+      resolve({ success: false, data: {}, error });
     });
 });
 

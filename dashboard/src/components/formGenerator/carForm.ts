@@ -1,4 +1,4 @@
-import {IFormItem, ISelectOption} from '.';
+import { IFormItem, ISelectOption } from '.';
 
 let marksOptions: ISelectOption[] = [];
 let modelsOptions: ISelectOption[] = [];
@@ -6,10 +6,10 @@ let citiesOptions: ISelectOption[] = [];
 let horsepowerOptions: ISelectOption[] = [];
 
 const carForm = (cities: string[], marks: string[], models: string[], horsepower: string[]): IFormItem[] => {
-  citiesOptions = cities.map(city => ({label: city, value: city}));
-  marksOptions = marks.map(mark => ({label: mark, value: mark}));
-  modelsOptions = models.map(model => ({label: model, value: model}));
-  horsepowerOptions = horsepower.map(horsepower => ({label: horsepower, value: horsepower}));
+  citiesOptions = cities.map(city => ({ label: city, value: city }));
+  marksOptions = marks.map(mark => ({ label: mark, value: mark }));
+  modelsOptions = models.map(model => ({ label: model, value: model }));
+  horsepowerOptions = horsepower.map(horsepower => ({ label: horsepower, value: horsepower }));
 
   return ([
     {

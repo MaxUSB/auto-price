@@ -1,7 +1,7 @@
 import React from 'react';
-import {ChartData} from 'chart.js';
-import {Chart} from 'react-chartjs-2';
-import {createStyles, makeStyles} from '@mui/styles';
+import { ChartData } from 'chart.js';
+import { Chart } from 'react-chartjs-2';
+import { createStyles, makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -16,7 +16,7 @@ interface ILineChartProps {
 }
 
 const LineChart = (props: ILineChartProps) => {
-  const {data} = props;
+  const { data } = props;
   const classes = useStyles();
 
   const getChartData = (similarCars: any[]): ChartData => ({

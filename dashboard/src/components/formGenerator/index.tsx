@@ -1,6 +1,6 @@
-import React, {ReactNode} from 'react';
-import {IDictionary} from "../../utils/types";
-import {Grid, Autocomplete, TextField, createFilterOptions, MenuItem} from "@mui/material";
+import React, { ReactNode } from 'react';
+import { IDictionary } from "../../utils/types";
+import { Grid, Autocomplete, TextField, createFilterOptions, MenuItem } from "@mui/material";
 
 export type THandleChange = (item: string, value: any) => void;
 
@@ -56,7 +56,7 @@ const formElements: IDictionary<TGetFormElements> = {
           }
           filterOptions={(options, params) => {
             const filtered = filter(options, params);
-            const {inputValue} = params;
+            const { inputValue } = params;
             const isExisting = options.some(option => inputValue === option.label);
             if (inputValue !== '' && !isExisting) {
               filtered.push({
