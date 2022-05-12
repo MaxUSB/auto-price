@@ -6,16 +6,20 @@
       "subtasks": ["parse_data", "teach_predictor", "fill_catalogs", "reload_models"]
     }, {
       "name": "parse_data",
-      "command": "python {path}/run_parser.py"
+      "command": "python {path}/run_parser.py",
+      "can_verbose": true
     }, {
       "name": "teach_predictor",
-      "command": "python {path}/run_teacher.py"
+      "command": "python {path}/run_teacher.py",
+      "can_verbose": true
     }, {
       "name": "fill_catalogs",
-      "command": "python {path}/run_catalog_filler.py"
+      "command": "python {path}/run_catalog_filler.py",
+      "can_verbose": true
     }, {
       "name": "reload_models",
-      "command": "wget -q -O/dev/null http://localhost:3001/reload_models"
+      "command": "wget -q -O/dev/null http://localhost:3001/reload_models",
+      "can_verbose": false
     }
   ]
 }

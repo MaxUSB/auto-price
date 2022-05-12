@@ -1,29 +1,37 @@
 import sys
+import argparse
 from modules import Predictor
 from modules.utils import get_data
 
 
-def run():
-    print('getting data...', end=' ')
+def run(verbose):
+    if verbose:
+        print('getting data...', end=' ')
     data = get_data('autoru_learn.csv', 'raw')
     if data is None:
-        print('error: data is None', file=sys.stderr)
+        print('error (teacher): data is None', file=sys.stderr)
 
-    print('done.\nfit model...')
+    if verbose:
+        print('done.\nfit model...')
     predictor = Predictor()
     success, error = predictor.fit(data)
     if not success:
-        print(f'error: {error}', file=sys.stderr)
+        print(f'error (teacher): {error}', file=sys.stderr)
         return 1
 
-    print('store model...', end=' ')
+    if verbose:
+        print('store model...', end=' ')
     success = predictor.store_model()
     if not success:
         return 1
-    print('done.')
+    if verbose:
+        print('done.')
 
     return 0
 
 
 if __name__ == '__main__':
-    raise SystemExit(run())
+    args_parser = argparse.ArgumentParser()
+    args_parser.add_argument("-v", dest="verbose", action=argparse.BooleanOptionalAction)
+    args = args_parser.parse_args()
+    raise SystemExit(run(args.verbose))

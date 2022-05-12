@@ -1,10 +1,11 @@
+import argparse
 from modules import CatalogFiller
 from modules.utils import get_data
 
 
-def run():
+def run(verbose):
     rc = None
-    catalog_filler = CatalogFiller()
+    catalog_filler = CatalogFiller(verbose)
 
     print('AutoRu fill catalogs...')
     cars = get_data('autoru_learn.csv', 'raw')
@@ -14,4 +15,7 @@ def run():
 
 
 if __name__ == '__main__':
-    raise SystemExit(run())
+    args_parser = argparse.ArgumentParser()
+    args_parser.add_argument("-v", dest="verbose", action=argparse.BooleanOptionalAction)
+    args = args_parser.parse_args()
+    raise SystemExit(run(args.verbose))

@@ -46,7 +46,7 @@ def build_compare_metrics(prediction, y):
     return [mse, rmse, r2]
 
 
-def run(only_models_compare=False):
+def run(verbose=False):
     global cars
     cars.dropna(inplace=True)
     cars['Owners'] = cars['Owners'].astype(str)
@@ -54,7 +54,7 @@ def run(only_models_compare=False):
     cars = cars[['Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
     # cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
 
-    if not only_models_compare:
+    if not verbose:
         print(separator)
         print(f'MARKS (count={len(cars.Mark.unique())})\n', cars.Mark.unique())
 
@@ -183,6 +183,6 @@ def run(only_models_compare=False):
 
 if __name__ == '__main__':
     args_parser = argparse.ArgumentParser()
-    args_parser.add_argument('-c', dest='only_models_compare', action='store_true')
+    args_parser.add_argument("-v", dest="verbose", action=argparse.BooleanOptionalAction)
     args = args_parser.parse_args()
-    raise SystemExit(run(args.only_models_compare))
+    raise SystemExit(run(args.verbose))

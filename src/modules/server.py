@@ -9,21 +9,19 @@ from flask_restful import Api, Resource
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.v = verbose
         self.app = Flask(__name__)
         self.api = Api(self.app)
         CORS(self.app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-        predictor = Predictor()
-        predictor.restore_model()
-        db_config = get_config('db')
-
-        self.initedCatalogsAPI = self.CatalogsAPI.init(db_config)
-        self.initedPredictorAPI = self.PredictorAPI.init(predictor)
+        self.initedCatalogsAPI = self.CatalogsAPI.init()
+        self.initedPredictorAPI = self.PredictorAPI.init(self.v)
 
     class CatalogsAPI(Resource):
         @classmethod
-        def init(cls, db_config):
+        def init(cls):
+            db_config = get_config('db')
             cls.db = DataBase(db_config['catalogs'])
             cls.catalog_queries = {
                 'cities': 'SELECT city FROM cities',
@@ -75,7 +73,9 @@ class Server:
 
     class PredictorAPI(Resource):
         @classmethod
-        def init(cls, predictor):
+        def init(cls, verbose):
+            predictor = Predictor(verbose)
+            predictor.restore_model()
             cls.predictor = predictor
             return cls
 
@@ -88,7 +88,6 @@ class Server:
                            'error': None,
                        }, 500
             else:
-                print('models reloaded', flush=True)
                 return {
                            'success': True,
                            'data': {},
@@ -124,4 +123,5 @@ class Server:
     def run(self, port):
         self.api.add_resource(self.initedCatalogsAPI, '/catalogs')
         self.api.add_resource(self.initedPredictorAPI, '/predict', '/reload_models')
-        self.app.run(debug=True, port=port)
+        self.app.debug = self.v
+        self.app.run(port=port)

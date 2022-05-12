@@ -5,7 +5,8 @@ from .database import DataBase
 
 
 class CatalogFiller:
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.v = verbose
         self.config = get_config('catalogFiller')
         self.db = DataBase(get_config('db')['catalogs'])
 
@@ -24,37 +25,42 @@ class CatalogFiller:
         return success, to_save, error
 
     def fill_catalogs(self, cars):
-        print('create catalogs if not exists...', end=' ')
+        if self.v:
+            print('create catalogs if not exists...', end=' ')
         success, error = self.db.create_tables(self.config['tables'])
         if not success:
-            print(f'error: {error}', file=sys.stderr)
+            print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
 
-        print('done.\ntruncate catalogs...', end=' ')
+        if self.v:
+            print('done.\ntruncate catalogs...', end=' ')
         success, error = self.db.truncate_tables(list(map(lambda table: table['name'], self.config['tables'])))
         if not success:
-            print(f'error: {error}', file=sys.stderr)
+            print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
 
-        print('done.\nfill base catalogs...', end=' ')
+        if self.v:
+            print('done.\nfill base catalogs...', end=' ')
         success, cities, error = self.__save_data_df(cars, 'City', 'cities')
         if not success:
-            print(f'error: {error}', file=sys.stderr)
+            print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
         success, marks, error = self.__save_data_df(cars, 'Mark', 'marks')
         if not success:
-            print(f'error: {error}', file=sys.stderr)
+            print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
 
-        print('done.\nfill dependent catalogs...', end=' ')
+        if self.v:
+            print('done.\nfill dependent catalogs...', end=' ')
         success, models, error = self.__save_dependent_data_df(marks, cars, 'Model', 'models')
         if not success:
-            print(f'error: {error}', file=sys.stderr)
+            print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
         success, horsepower, error = self.__save_dependent_data_df(models, cars, 'Horsepower', 'horsepower')
         if not success:
-            print(f'error: {error}', file=sys.stderr)
+            print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
-        print('done.')
+        if self.v:
+            print('done.')
 
         return 0

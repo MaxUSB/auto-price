@@ -9,7 +9,8 @@ from twisted.internet import reactor, threads
 
 
 class Scheduler:
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.v = verbose
         config = get_config('scheduler')
         tasks = config['tasks']
         child_init_options = {
@@ -21,7 +22,11 @@ class Scheduler:
         }
         self.waiter = None
         self.popen_childs = {}
-        self.childs = {child['name']: {**child_init_options, 'command': child['command']} for child in tasks if 'command' in child}
+        self.childs = {child['name']: {
+            **child_init_options,
+            'command': child['command'],
+            'can_verbose': child['can_verbose']
+        } for child in tasks if 'command' in child}
         self.subtasks = {child['name']: child['subtasks'] for child in tasks if 'subtasks' in child}
         self.delays = {}
         self.delayed_calls = {}
@@ -31,7 +36,10 @@ class Scheduler:
             self.delayed_calls[task] = reactor.callLater(self.delays[task].next(default_utc=True), self.__start_task, task)
 
     def __get_popen_command(self, task):
-        return self.childs[task]['command'].format(**{'path': f'{os.getenv("project_path")}/src'}).split(' ')
+        command = self.childs[task]['command'].format(**{'path': f'{os.getenv("project_path")}/src'}).split(' ')
+        if self.v and self.childs[task]['can_verbose']:
+            command.push('-v')
+        return command
 
     def __start_task(self, task, base_task=None):
         if base_task is None:

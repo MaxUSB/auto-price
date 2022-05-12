@@ -6,7 +6,8 @@ from .utils import get_config, save_data
 
 
 class Parser:
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.v = verbose
         self.url = ''
         self.config = get_config('parser')
 
@@ -15,8 +16,9 @@ class Parser:
 
         parsed_cars_df = pd.DataFrame()
         while start_price < end_price:
-            print(f'for price interval {start_price}...{start_price + increment}:')
-            print('getting page number...', end=' ')
+            if self.v:
+                print(f'for price interval {start_price}...{start_price + increment}:')
+                print('getting page number...', end=' ')
             request_parameter = {
                 "category": "cars",
                 "section": "used",
@@ -28,10 +30,12 @@ class Parser:
             response = requests.post(url=self.url, json=request_parameter, headers=self.config['autoru_headers']).json()
             total_pages = response['pagination']['total_page_count']
 
-            print('done.\nparsing running:')
+            if self.v:
+                print('done.\nparsing running:')
             parsed_cars = []
             for page in range(1, total_pages + 1):
-                print(f'\r\t{page} of {total_pages} pages...', end=' ')
+                if self.v:
+                    print(f'\r\t{page} of {total_pages} pages...', end=' ')
                 request_parameter['page'] = page
                 response = requests.post(url=self.url, json=request_parameter, headers=self.config['autoru_headers'])
                 if response.status_code == 200:
@@ -103,20 +107,22 @@ class Parser:
                             car_dict['PriceSegment'] = None
                         parsed_cars.append(car_dict)
                 else:
-                    print(f'\nerror: {response.status_code} status for page {page}', file=sys.stderr)
+                    print(f'\nerror (parser): {response.status_code} status for page {page}', file=sys.stderr)
 
-            print('done.\nsaving data...', end=' ')
+            if self.v:
+                print('done.\nsaving data...', end=' ')
             parsed_cars_df = parsed_cars_df.append(parsed_cars)
             parsed_cars_df.drop(columns=['ID'], inplace=True)
             parsed_cars_df['Mark'] = parsed_cars_df['Mark'].apply(lambda x: 'LADA' if x == 'LADA (ВАЗ)' else x)
             success = save_data(parsed_cars_df, 'autoru_learn.csv', 'raw')
             if not success:
                 return 1
-            print('done.')
+            if self.v:
+                print('done.')
             start_price += increment
 
         if parsed_cars_df.empty:
-            print('error: no car was parsed', file=sys.stderr)
+            print('error (parser): no car was parsed', file=sys.stderr)
             return 1
 
         return 0

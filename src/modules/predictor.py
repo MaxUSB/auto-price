@@ -5,7 +5,8 @@ from .utils import get_config, get_data, save_data
 
 
 class Predictor:
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.v = verbose
         self.config = get_config('predictor')
         self.target = self.config['target']
         self.features = self.config['features']
@@ -32,7 +33,7 @@ class Predictor:
                 cities['CityID'] = cities['CityID'].cat.codes
                 self.custom_encode_dicts[field] = cities.set_index('City')['CityID']
             else:
-                print(f'error: not found set encode dict handle for {field} field', file=sys.stderr)
+                print(f'error (predictor): not found set encode dict handle for {field} field', file=sys.stderr)
 
     def __encode_fields(self, data):
         for field in self.features.keys():
@@ -47,7 +48,7 @@ class Predictor:
             elif encoding_type == 'none':
                 continue
             else:
-                print(f'error: not found {encoding_type} encoding type handle', file=sys.stderr)
+                print(f'error (predictor): not found {encoding_type} encoding type handle', file=sys.stderr)
         return data
 
     def __segment_split(self, data):
@@ -78,30 +79,37 @@ class Predictor:
     def fit(self, data):
         try:
             data = data[self.features.keys()]
-            print('setting custom field encode dicts...', end=' ')
+            if self.v:
+                print('setting custom field encode dicts...', end=' ')
             self.__set_custom_field_encode_dicts(data)
-            print('done.\nsplitting data by segment...', end=' ')
+            if self.v:
+                print('done.\nsplitting data by segment...', end=' ')
             data_e, data_m, data_p = self.__segment_split(data)
-            print('done.\nencoding fields...', end=' ')
+            if self.v:
+                print('done.\nencoding fields...', end=' ')
             data_e = self.__encode_fields(data_e.copy())
             data_m = self.__encode_fields(data_m.copy())
             data_p = self.__encode_fields(data_p.copy())
-            print('done.\ncreating training pools...', end=' ')
+            if self.v:
+                print('done.\ncreating training pools...', end=' ')
             x_e = data_e.drop(columns=self.target)
             x_m = data_m.drop(columns=self.target)
             x_p = data_p.drop(columns=self.target)
             y_e = data_e[self.target]
             y_m = data_m[self.target]
             y_p = data_p[self.target]
-            print('done.\ncreating models...', end=' ')
+            if self.v:
+                print('done.\ncreating models...', end=' ')
             self.model_e = RandomForestRegressor(random_state=369)
             self.model_m = RandomForestRegressor(random_state=369)
             self.model_p = RandomForestRegressor(random_state=369)
-            print('done.\ntraining models...', end=' ')
+            if self.v:
+                print('done.\ntraining models...', end=' ')
             self.model_e.fit(x_e, y_e)
             self.model_m.fit(x_m, y_m)
             self.model_p.fit(x_p, y_p)
-            print('done.\ncreating error models...', end=' ')
+            if self.v:
+                print('done.\ncreating error models...', end=' ')
             error_df_e = pd.DataFrame({'real': y_e, 'predicted': self.model_e.predict(x_e)})
             error_df_m = pd.DataFrame({'real': y_m, 'predicted': self.model_m.predict(x_m)})
             error_df_p = pd.DataFrame({'real': y_p, 'predicted': self.model_p.predict(x_p)})
@@ -111,11 +119,13 @@ class Predictor:
             self.error_model_e = RandomForestRegressor(random_state=369)
             self.error_model_m = RandomForestRegressor(random_state=369)
             self.error_model_p = RandomForestRegressor(random_state=369)
-            print('done.\ntraining error models...', end=' ')
+            if self.v:
+                print('done.\ntraining error models...', end=' ')
             self.error_model_e.fit(x_e, error_df_e['error'])
             self.error_model_m.fit(x_m, error_df_m['error'])
             self.error_model_p.fit(x_p, error_df_p['error'])
-            print('done.')
+            if self.v:
+                print('done.')
             return True, None
         except Exception as e:
             return False, e
@@ -130,24 +140,28 @@ class Predictor:
             data[self.target] = 0
             data['PriceSegment'] = 'UNKNOWN'
             data = data[self.features.keys()]
-            print('getting segment model...', end=' ')
+            if self.v:
+                print('getting segment model...', end=' ')
             model, error_model = self.__get_segment_model(data['Model'].iloc[0])
-            print('done.\nencoding fields...', end=' ')
+            if self.v:
+                print('done.\nencoding fields...', end=' ')
             data = self.__encode_fields(data.copy())
             data.drop(columns=self.target, inplace=True)
             false_binary_columns = [col for col in model.feature_names_in_ if col not in data.columns]
             if false_binary_columns:
                 data[false_binary_columns] = 0
             data = data[model.feature_names_in_]
-            print('done.\npredicting price...', end=' ')
+            if self.v:
+                print('done.\npredicting price...', end=' ')
             result[self.target] = int(model.predict(data)[0])
-            print('done.\npredicting error...', end=' ')
-            print(int(result[self.target] * abs(round(error_model.predict(data)[0], 2))))
+            if self.v:
+                print('done.\npredicting error...', end=' ')
             result['PredictedError'] = int(result[self.target] * abs(round(error_model.predict(data)[0], 2)))
-            print('done.')
+            if self.v:
+                print('done.')
             return True, result
         except Exception as e:
-            print(f'error: {e}', file=sys.stderr, flush=True)
+            print(f'error (predictor): {e}', file=sys.stderr, flush=True)
             return False, None
 
     def store_model(self):
