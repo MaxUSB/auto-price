@@ -80,8 +80,8 @@ interface IPredictState {
 const Predict = () => {
   const classes = useStyles();
   const [state, setState] = useState<IPredictState>({
-    // car: {city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', year: 2007, mileage: 240000, owners: 4},
-    // car: {city: 'Тюмень', mark: 'Chevrolet', model: 'Aveo', horsepower: '101', year: 2011, mileage: 120000, owners: 2},
+    // car: { city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', year: 2007, mileage: 240000, owners: 4 },
+    // car: { city: 'Тюмень', mark: 'Chevrolet', model: 'Aveo', horsepower: '101', year: 2011, mileage: 120000, owners: 2 },
     car: {},
     catalogs: {},
     activeStep: 0,
