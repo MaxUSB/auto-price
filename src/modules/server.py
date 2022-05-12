@@ -79,6 +79,22 @@ class Server:
             cls.predictor = predictor
             return cls
 
+        def get(self):
+            success = self.predictor.restore_model()
+            if not success:
+                return {
+                           'success': False,
+                           'data': {},
+                           'error': None,
+                       }, 500
+            else:
+                print('models reloaded', flush=True)
+                return {
+                           'success': True,
+                           'data': {},
+                           'error': None,
+                       }, 200
+
         def post(self):
             try:
                 data = request.json.get('data')
@@ -107,5 +123,5 @@ class Server:
 
     def run(self, port):
         self.api.add_resource(self.initedCatalogsAPI, '/catalogs')
-        self.api.add_resource(self.initedPredictorAPI, '/predict')
+        self.api.add_resource(self.initedPredictorAPI, '/predict', '/reload_models')
         self.app.run(debug=True, port=port)

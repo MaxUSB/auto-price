@@ -3,7 +3,7 @@
     {
       "name": "reteach_model",
       "schedule": "0 0 * * 1",
-      "subtasks": ["parse_data", "teach_predictor", "fill_catalogs"]
+      "subtasks": ["parse_data", "teach_predictor", "fill_catalogs", "reload_models"]
     }, {
       "name": "parse_data",
       "command": "python {path}/run_parser.py"
@@ -13,6 +13,9 @@
     }, {
       "name": "fill_catalogs",
       "command": "python {path}/run_catalog_filler.py"
+    }, {
+      "name": "reload_models",
+      "command": "wget -q -O/dev/null http://localhost:3001/reload_models"
     }
   ]
 }
