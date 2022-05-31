@@ -105,6 +105,26 @@ class Parser:
                             car_dict['PriceSegment'] = car['vehicle_info']['super_gen']['price_segment']
                         except:
                             car_dict['PriceSegment'] = None
+                        try:
+                            car_dict['Tax'] = car['owner_expenses']['transport_tax']['tax_by_year']
+                        except:
+                            car_dict['Tax'] = None
+                        try:
+                            car_dict['Trunk'] = car['vehicle_info']['configuration']['trunk_volume_min']
+                        except:
+                            car_dict['Trunk'] = None
+                        try:
+                            car_dict['EngineVolume'] = car['vehicle_info']['tech_param']['displacement']
+                        except:
+                            car_dict['EngineVolume'] = None
+                        try:
+                            car_dict['Acceleration'] = car['vehicle_info']['tech_param']['acceleration']
+                        except:
+                            car_dict['Acceleration'] = None
+                        try:
+                            car_dict['Clearance'] = car['vehicle_info']['tech_param']['clearance_min']
+                        except:
+                            car_dict['Clearance'] = None
                         parsed_cars.append(car_dict)
                 else:
                     print(f'\nerror (parser): {response.status_code} status for page {page}', file=sys.stderr)

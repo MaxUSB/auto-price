@@ -2,10 +2,11 @@ import argparse
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from numpy import polyfit, poly1d
 from modules.utils import get_data
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 
 cars = get_data('autoru_learn_full.csv', 'raw')
@@ -13,17 +14,20 @@ separator = '===================================================================
 
 
 def build_cat_feature_plot(x, grid_place):
-    plt.subplot(1, 2, grid_place)
+    plt.subplot(6, 2, grid_place)
     plt.title(x)
     sns.countplot(data=cars, x=x)
-    plt.subplot(1, 2, grid_place + 1)
+    plt.subplot(6, 2, grid_place + 1)
     plt.title(f'{x} vs Price')
     sns.boxplot(x=cars[x], y=cars.Price)
 
 
 def build_num_feature_plot(x, grid_place):
-    plt.subplot(2, 2, grid_place)
+    plt.subplot(4, 2, grid_place)
+    z = polyfit(cars[x], cars.Price, 1)
+    p = poly1d(z)
     plt.scatter(x=cars[x], y=cars.Price)
+    plt.plot(cars[x], p(cars[x]), "r--")
     plt.title(f'{x} vs Price')
     plt.ylabel('Price')
     plt.xlabel(x)
@@ -53,6 +57,7 @@ def run(verbose=False):
     # cars = cars[cars['PriceSegment'] == 'ECONOMY']
     cars = cars[['Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
     # cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model']]
+    # cars = cars[['Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Price', 'Model', 'Tax', 'Trunk', 'EngineVolume', 'Acceleration', 'Clearance']]
 
     if not verbose:
         print(separator)
@@ -125,6 +130,7 @@ def run(verbose=False):
     print('CORRELATION PLOT')
     cars = cars[['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model']]
     # cars = cars[['Price', 'Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Model']]
+    # cars = cars[['Price', 'Mark', 'City', 'Owners', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Year', 'Mileage', 'Horsepower', 'Model', 'Tax', 'Trunk', 'EngineVolume', 'Acceleration', 'Clearance']]
     plt.figure(figsize=(30, 25))
     sns.set(font_scale=4)
     sns.heatmap(cars.corr(method='spearman'), annot=True)
