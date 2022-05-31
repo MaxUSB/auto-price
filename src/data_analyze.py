@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 
-cars = get_data('autoru_learn_full.csv', 'raw')
+cars = get_data('autoru_learn.csv', 'raw')
 separator = '======================================================================================'
 
 
@@ -102,6 +102,7 @@ def run(verbose=False):
         exclude_num_features = ['Price']
         num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
         for num_feature in num_features:
+            # cars[num_feature] = (cars[num_feature] - cars[num_feature].min()) / (cars[num_feature].max() - cars[num_feature].min())
             build_num_feature_plot(num_feature, grid_place)
             grid_place += 1
         plt.tight_layout()
@@ -109,10 +110,11 @@ def run(verbose=False):
 
     print(separator)
     print('ENCODED FEATURE')
-    # cars['GearType'] = cars['GearType'].apply(lambda x: '4wd' if x == 'ALL_WHEEL_DRIVE' else '2wd')
-    # cars['Transmission'] = cars['Transmission'].apply(lambda x: 'mt' if x == 'MECHANICAL' else 'at')
     # cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
-    # cars = pd.get_dummies(cars, columns=['Transmission', 'FuelType', 'GearType', 'Pts'])
+    # cars['GearType'] = cars['GearType'].apply(lambda x: 1 if x == 'ALL_WHEEL_DRIVE' else -1)
+    # cars['Transmission'] = cars['Transmission'].apply(lambda x: 1 if x == 'MECHANICAL' else -1)
+    # cars['Pts'] = cars['Pts'].apply(lambda x: 1 if x == 'ORIGINAL' else -1)
+    # cars['FuelType'] = cars['FuelType'].apply(lambda x: 1 if x == 'GASOLINE' else -1)
     cars['Owners'] = cars['Owners'].astype('int64')
     mark_avg_prices = cars.groupby('Mark', as_index=False)['Price'].mean()  # dict of Marks
     cars = cars.merge(mark_avg_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
