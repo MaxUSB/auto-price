@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from math import sqrt
 from modules.utils import get_data
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -45,7 +46,8 @@ def build_predicts_plot(prediction, y, model):
 def get_metrics(prediction, y):
     rmse = mean_squared_error(y, prediction, squared=False)
     r2 = r2_score(y, prediction)
-    return [rmse, r2]
+    r = sqrt(r2)
+    return [rmse, round(r2, 3), round(r, 3)]
 
 
 def run(verbose=False):
@@ -158,7 +160,7 @@ def run(verbose=False):
         'Ridge': get_metrics(ridge_pred, y_test),
         'ElasticNet': get_metrics(en_pred, y_test),
         'RandomForest': get_metrics(rf_pred, y_test),
-    }, index=['RMSE', 'R2']).T.sort_values(by='R2', ascending=False)
+    }, index=['RMSE', 'R2', 'R']).T.sort_values(by='R2', ascending=False)
     print(metrics_df)
 
     print(separator)
