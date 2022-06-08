@@ -62,7 +62,7 @@ const PredictResults = (props: IPredictResultsProps) => {
                   {`${(predictedPrice - predictedError).toLocaleString('ru-RU')} - ${(predictedPrice + predictedError).toLocaleString('ru-RU')}`}
                   <CurrencyRuble fontSize="large"/>
                 </Typography>
-                <Typography variant="h5" textAlign="center">возможный диапозон стоимости</Typography>
+                <Typography variant="h5" textAlign="center">возможный диапазон стоимости</Typography>
               </Stack>
               {similarCars ? (
                 <Stack spacing={2} className={classes.fullWidth}>

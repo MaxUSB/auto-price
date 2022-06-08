@@ -20,7 +20,7 @@ const LineChart = (props: ILineChartProps) => {
   const classes = useStyles();
 
   const getChartData = (similarCars: any[]): ChartData => ({
-    labels: similarCars ? similarCars.map(car => car['Model']) : [],
+    labels: similarCars ? similarCars.map((car, index) => `Авто ${index + 1}`) : [],
     datasets: similarCars ? [{
       label: 'Стоимость',
       data: similarCars.map(car => car['Price']),
