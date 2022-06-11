@@ -28,6 +28,12 @@ def build_num_feature_plot(x, grid_place, rows_count):
     plt.title(x)
 
 
+def build_price_distribution(x, field_value, grid_place, rows_count):
+    plt.subplot(rows_count, 2, grid_place)
+    plt.hist(x)
+    plt.title(field_value)
+
+
 def build_predicts_plot(prediction, y, model):
     plt.figure(figsize=(7, 7))
     plt.scatter(y, prediction)
@@ -42,6 +48,10 @@ def get_metrics(prediction, y):
     r2 = r2_score(y, prediction)
     rmse = mean_squared_error(y, prediction, squared=False)
     return [r2, rmse]
+
+
+def get_relative_error():
+    pass
 
 
 def run():
@@ -72,7 +82,6 @@ def run():
         grid_place += 1
     plt.tight_layout()
     plt.show()
-    # CLEAR BAD VALUES
     for x in num_features:
         q75, q25 = np.percentile(cars.loc[:, x], [75, 25])
         qr = q75 - q25
@@ -81,6 +90,18 @@ def run():
         cars.loc[cars[x] < min_val, x] = np.nan
         cars.loc[cars[x] > max_val, x] = np.nan
     cars = cars.dropna()
+
+    print(separator)
+    print('MARKS AND MODELS DISTRIBUTION')
+    for field in ['Mark', 'Model']:
+        grid_place = 1
+        field_values = cars[field].unique()[:6]
+        plt.figure(figsize=(5, 5))
+        for field_value in field_values:
+            build_price_distribution(cars[cars[field] == field_value]['Price'], field_value, grid_place, int(len(field_values) / 2))
+            grid_place += 1
+        plt.tight_layout()
+        plt.show()
 
     print(separator)
     print('FEATURE ENCODING')
@@ -92,11 +113,11 @@ def run():
 
     cars['Owners'] = cars['Owners'].astype('int64')
 
-    mark_avg_prices = cars.groupby('Mark', as_index=False)['Price'].mean()  # dict of Marks for predictor
-    cars = cars.merge(mark_avg_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
+    mark_median_prices = cars.groupby('Mark', as_index=False)['Price'].median()  # dict of Marks for predictor
+    cars = cars.merge(mark_median_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
 
-    model_avg_prices = cars.groupby('Model', as_index=False)['Price'].mean()  # dict of Models for predictor
-    cars = cars.merge(model_avg_prices, how='left', on='Model', suffixes=('', 'Mean')).drop(columns=['Model']).rename(columns={'PriceMean': 'Model'})
+    model_median_prices = cars.groupby('Model', as_index=False)['Price'].median()  # dict of Models for predictor
+    cars = cars.merge(model_median_prices, how='left', on='Model', suffixes=('', 'Mean')).drop(columns=['Model']).rename(columns={'PriceMean': 'Model'})
 
     cars['CityID'] = cars['City'].astype('category').cat.codes
     cities_id = cars[['City', 'CityID']].drop_duplicates()  # dict of Cities for predictor
@@ -161,6 +182,17 @@ def run():
         'RandomForest': get_metrics(rf_pred, y_test),
     }, index=['R2', 'RMSE']).T.sort_values(by=['R2', 'RMSE'], ascending=[False, True])
     print(metrics_df)
+
+    print(separator)
+    print('RELATIVE ERRORS')
+    metrics_df = pd.DataFrame({
+        'LinearRegression': get_relative_error(),
+        'Lasso': get_relative_error(),
+        'Ridge': get_relative_error(),
+        'ElasticNet': get_relative_error(),
+        'RandomForest': get_relative_error(),
+    })
+    print(metrics_df.describe())
 
     print(separator)
     print('FEATURE IMPORTANCE')
