@@ -1,24 +1,19 @@
-import argparse
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from math import sqrt
 from modules.utils import get_data
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 
-separator = '======================================================================================'
+separator = '=================================================================================================='
 
-features = ['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model']
-# features = ['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model', 'Pts', 'Transmission', 'FuelType', 'GearType']
-# features = ['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Tax', 'Trunk', 'EngineVolume', 'Acceleration', 'Clearance']
+features = ['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Tax', 'Trunk', 'Capacity', 'Acceleration', 'Clearance']
 
-cars = get_data('autoru_learn_full.csv', 'raw').dropna()
-cars['Owners'] = cars['Owners'].astype(str)
-cars = cars[features]
+cars = get_data('autoru_learn.csv', 'raw')
+cars = cars[features].dropna()
 
 
 def build_cat_feature_plot(x, grid_place, rows_count):
@@ -44,43 +39,41 @@ def build_predicts_plot(prediction, y, model):
 
 
 def get_metrics(prediction, y):
-    rmse = mean_squared_error(y, prediction, squared=False)
     r2 = r2_score(y, prediction)
-    r = sqrt(r2)
-    return [rmse, round(r2, 3), round(r, 3)]
+    rmse = mean_squared_error(y, prediction, squared=False)
+    return [r2, rmse]
 
 
-def run(verbose=False):
+def run():
     global cars
     # cars = cars[cars['PriceSegment'] == 'ECONOMY']
+    cars['Owners'] = cars['Owners'].astype(str)
 
-    if verbose:
-        print(separator)
-        print('CAT FEATURES ANALYZE')
-        grid_place = 1
-        plt.figure(figsize=(10, 20))
-        exclude_cat_features = ['City', 'Mark', 'Model', 'PriceSegment']
-        cat_features = [x for x in list(cars.select_dtypes(include=['object', 'bool']).columns) if x not in exclude_cat_features]
-        for cat_feature in cat_features:
-            build_cat_feature_plot(cat_feature, grid_place, len(cat_features))
-            grid_place += 1
-        plt.tight_layout()
-        plt.show()
+    print(separator)
+    print('CAT FEATURES ANALYZE')
+    grid_place = 1
+    plt.figure(figsize=(10, 20))
+    exclude_cat_features = ['City', 'Mark', 'Model', 'Pts', 'PriceSegment']
+    cat_features = [x for x in list(cars.select_dtypes(include=['object', 'bool']).columns) if x not in exclude_cat_features]
+    for cat_feature in cat_features:
+        build_cat_feature_plot(cat_feature, grid_place, len(cat_features))
+        grid_place += 1
+    plt.tight_layout()
+    plt.show()
 
-        print(separator)
-        print('NUM FEATURES ANALYZE')
-        grid_place = 1
-        plt.figure(figsize=(10, 20))
-        exclude_num_features = ['Price']
-        num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
-        for num_feature in num_features:
-            build_num_feature_plot(num_feature, grid_place, len(num_features))
-            grid_place += 1
-        plt.tight_layout()
-        plt.show()
-
+    print(separator)
+    print('NUM FEATURES ANALYZE')
+    grid_place = 1
+    plt.figure(figsize=(10, 20))
+    exclude_num_features = ['Price']
+    num_features = [x for x in list(cars.select_dtypes(include=['int64', 'float64']).columns) if x not in exclude_num_features]
+    for num_feature in num_features:
+        build_num_feature_plot(num_feature, grid_place, len(num_features))
+        grid_place += 1
+    plt.tight_layout()
+    plt.show()
     # CLEAR BAD VALUES
-    for x in ['Mileage']:
+    for x in num_features:
         q75, q25 = np.percentile(cars.loc[:, x], [75, 25])
         qr = q75 - q25
         min_val = q25 - (1.5 * qr)
@@ -91,11 +84,11 @@ def run(verbose=False):
 
     print(separator)
     print('FEATURE ENCODING')
-    # cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
-    # cars['GearType'] = cars['GearType'].apply(lambda x: 1 if x == 'ALL_WHEEL_DRIVE' else 0)
-    # cars['Transmission'] = cars['Transmission'].apply(lambda x: 1 if x == 'MECHANICAL' else 0)
-    # cars['Pts'] = cars['Pts'].apply(lambda x: 1 if x == 'ORIGINAL' else 0)
-    # cars['FuelType'] = cars['FuelType'].apply(lambda x: 1 if x == 'GASOLINE' else 0)
+    cars = cars[cars['FuelType'].isin(['GASOLINE', 'DIESEL'])]
+    cars['GearType'] = cars['GearType'].apply(lambda x: 1 if x == 'ALL_WHEEL_DRIVE' else 0)
+    cars['Transmission'] = cars['Transmission'].apply(lambda x: 1 if x == 'MECHANICAL' else 0)
+    cars['Pts'] = cars['Pts'].apply(lambda x: 1 if x == 'ORIGINAL' else 0)
+    cars['FuelType'] = cars['FuelType'].apply(lambda x: 1 if x == 'GASOLINE' else 0)
 
     cars['Owners'] = cars['Owners'].astype('int64')
 
@@ -110,20 +103,26 @@ def run(verbose=False):
     cars['City'] = cars['CityID']
     cars.drop(columns=['CityID'], inplace=True)
 
-    print(cars.head())
+    print(separator)
+    print('CORRELATION PLOT')
+    binary_features = [col for col in cars.columns if len(cars[col].unique()) == 2]
+    correlation_features = num_features + binary_features + ['Price']
+    plt.figure(figsize=(40, 35))
+    sns.set(font_scale=4)
+    sns.heatmap(cars[correlation_features].corr(method='spearman'), annot=True, fmt='.2f')
+    plt.show()
 
-    # print(separator)
-    # print('CORRELATION PLOT')
-    # cars = cars[features]
-    # plt.figure(figsize=(30, 25))
-    # sns.set(font_scale=4)
-    # sns.heatmap(cars.corr(method='spearman'), annot=True)
-    # plt.show()
+    print(separator)
+    print('FINAL FEATURES')
+    final_features = ['Price', 'City', 'Mark', 'Model', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Clearance']
+    cars = cars[final_features]
+    int_final_features = [feature for feature in final_features if feature not in ['Mark', 'Model']]
+    cars[int_final_features] = cars[int_final_features].astype(int)
+    cars.info()
 
     print(separator)
     print('FIT MODELS AND PREDICT')
     x = cars.drop('Price', axis=1)
-    x.info()
     y = cars['Price']
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=369)
 
@@ -160,7 +159,7 @@ def run(verbose=False):
         'Ridge': get_metrics(ridge_pred, y_test),
         'ElasticNet': get_metrics(en_pred, y_test),
         'RandomForest': get_metrics(rf_pred, y_test),
-    }, index=['RMSE', 'R2', 'R']).T.sort_values(by='R2', ascending=False)
+    }, index=['R2', 'RMSE']).T.sort_values(by=['R2', 'RMSE'], ascending=[False, True])
     print(metrics_df)
 
     print(separator)
@@ -172,7 +171,4 @@ def run(verbose=False):
 
 
 if __name__ == '__main__':
-    args_parser = argparse.ArgumentParser()
-    args_parser.add_argument("-v", dest="verbose", action=argparse.BooleanOptionalAction)
-    args = args_parser.parse_args()
-    raise SystemExit(run(args.verbose))
+    raise SystemExit(run())
