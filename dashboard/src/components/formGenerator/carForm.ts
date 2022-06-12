@@ -4,12 +4,14 @@ let marksOptions: ISelectOption[] = [];
 let modelsOptions: ISelectOption[] = [];
 let citiesOptions: ISelectOption[] = [];
 let horsepowerOptions: ISelectOption[] = [];
+let clearancesOptions: ISelectOption[] = [];
 
-const carForm = (cities: string[], marks: string[], models: string[], horsepower: string[]): IFormItem[] => {
+const carForm = (cities: string[], marks: string[], models: string[], horsepower: string[], clearance: string[]): IFormItem[] => {
   citiesOptions = cities.map(city => ({ label: city, value: city }));
   marksOptions = marks.map(mark => ({ label: mark, value: mark }));
   modelsOptions = models.map(model => ({ label: model, value: model }));
   horsepowerOptions = horsepower.map(horsepower => ({ label: horsepower, value: horsepower }));
+  clearancesOptions = clearance.map(clearance => ({ label: clearance, value: clearance }));
 
   return ([
     {
@@ -35,6 +37,11 @@ const carForm = (cities: string[], marks: string[], models: string[], horsepower
       elementType: 'autocomplete',
       label: 'Л.С.',
       selectOptions: horsepowerOptions,
+    }, {
+      field: 'clearance',
+      elementType: 'autocomplete',
+      label: 'Клиренс',
+      selectOptions: clearancesOptions,
     }, {
       field: 'year',
       elementType: 'text',

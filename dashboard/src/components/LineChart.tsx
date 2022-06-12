@@ -26,14 +26,14 @@ const LineChart = (props: ILineChartProps) => {
       data: similarCars.map(car => car['Price']),
       fill: true,
       borderColor: 'rgba(35, 213, 171, 1)',
-      backgroundColor: 'rgba(35, 213, 171, 0.2)',
+      backgroundColor: 'rgba(35, 213, 171, 0.7)',
     }] : [],
   });
 
   return (
     <div className={classes.root}>
       <Chart
-        type="line"
+        type="bar"
         data={getChartData(data)}
         options={{
           hover: {
@@ -55,7 +55,7 @@ const LineChart = (props: ILineChartProps) => {
                 },
                 label: (context) => {
                   const car = data[context['dataIndex']];
-                  return `Л.С.: ${car['Horsepower']}; Пробег: ${car['Mileage'].toLocaleString('ru-RU')} км; Владельцы: ${car['Owners']}`;
+                  return `Л.С.: ${car['Horsepower']}; Пробег: ${car['Mileage'].toLocaleString('ru-RU')} км; Владельцы: ${car['Owners']}; Клиренс: ${car['Clearance']}`;
                 },
                 footer: (context) => {
                   const car = data[context[0]['dataIndex']];

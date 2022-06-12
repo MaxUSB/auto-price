@@ -27,13 +27,18 @@ class Server:
                 'cities': 'SELECT city FROM cities',
                 'marks': 'SELECT mark FROM marks',
                 'models': 'SELECT model FROM marks ma JOIN models mo on mo.mark_id = ma.id WHERE mark = :mark',
-                'model_params': 'SELECT horsepower FROM models m JOIN horsepower hp ON hp.model_id = m.id WHERE model = :model',
+                'model_params': '''
+                    SELECT horsepower, clearance FROM models m
+                    JOIN horsepower hp ON hp.model_id = m.id
+                    JOIN clearances cl ON cl.model_id = m.id
+                    WHERE model = :model
+                ''',
             }
             cls.catalog_params = {
                 'cities': ['city'],
                 'marks': ['mark'],
                 'models': ['model'],
-                'model_params': ['horsepower'],
+                'model_params': ['horsepower', 'clearance'],
             }
             return cls
 
