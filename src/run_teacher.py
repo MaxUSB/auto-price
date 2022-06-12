@@ -12,7 +12,7 @@ def run(verbose):
         print('error (teacher): data is None', file=sys.stderr)
 
     if verbose:
-        print('done.\nfit model...')
+        print('done.\nfit model...', end=' ')
     predictor = Predictor()
     success, error = predictor.fit(data)
     if not success:
@@ -20,7 +20,7 @@ def run(verbose):
         return 1
 
     if verbose:
-        print('store model...', end=' ')
+        print('done.\nstore model...', end=' ')
     success = predictor.store_model()
     if not success:
         return 1

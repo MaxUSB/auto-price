@@ -51,7 +51,7 @@ class Predictor:
 
     def __segment_split(self, data):
         data_e = data[data['PriceSegment'] == 'ECONOMY'].drop(columns=['PriceSegment'])
-        data_m_and_p = data[data['PriceSegment'].isin('MEDIUM', 'PREMIUM')].drop(columns=['PriceSegment'])
+        data_m_and_p = data[data['PriceSegment'].isin(['MEDIUM', 'PREMIUM'])].drop(columns=['PriceSegment'])
         models_e = data_e['Model'].unique().tolist()
         models_m_and_p = data_m_and_p['Model'].unique().tolist()
         self.segments = pd.concat([self.segments, pd.DataFrame({'Model': models_e, 'Segment': ['ECONOMY'] * len(models_e)})], ignore_index=True)
