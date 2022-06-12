@@ -50,8 +50,11 @@ def get_metrics(prediction, y):
     return [r2, rmse]
 
 
-def get_relative_error():
-    pass
+def get_relative_error(prediction, y):
+    prediction = pd.Series(prediction).rename('Prediction')
+    y = y.reset_index(drop=True)
+    result = pd.concat([prediction, y], axis=1)
+    return result.apply(lambda row: abs(row['Price'] - row['Prediction']) / row['Price'], axis=1)
 
 
 def run():
@@ -92,7 +95,7 @@ def run():
     cars = cars.dropna()
 
     print(separator)
-    print('MARKS AND MODELS DISTRIBUTION')
+    print('MARKS AND MODELS PRICE DISTRIBUTION')
     for field in ['Mark', 'Model']:
         grid_place = 1
         field_values = cars[field].unique()[:6]
@@ -110,19 +113,16 @@ def run():
     cars['Transmission'] = cars['Transmission'].apply(lambda x: 1 if x == 'MECHANICAL' else 0)
     cars['Pts'] = cars['Pts'].apply(lambda x: 1 if x == 'ORIGINAL' else 0)
     cars['FuelType'] = cars['FuelType'].apply(lambda x: 1 if x == 'GASOLINE' else 0)
-
     cars['Owners'] = cars['Owners'].astype('int64')
-
     mark_median_prices = cars.groupby('Mark', as_index=False)['Price'].median()  # dict of Marks for predictor
     cars = cars.merge(mark_median_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
-
     model_median_prices = cars.groupby('Model', as_index=False)['Price'].median()  # dict of Models for predictor
     cars = cars.merge(model_median_prices, how='left', on='Model', suffixes=('', 'Mean')).drop(columns=['Model']).rename(columns={'PriceMean': 'Model'})
-
     cars['CityID'] = cars['City'].astype('category').cat.codes
     cities_id = cars[['City', 'CityID']].drop_duplicates()  # dict of Cities for predictor
     cars['City'] = cars['CityID']
     cars.drop(columns=['CityID'], inplace=True)
+    print(cars.head())
 
     print(separator)
     print('CORRELATION PLOT')
@@ -185,14 +185,14 @@ def run():
 
     print(separator)
     print('RELATIVE ERRORS')
-    metrics_df = pd.DataFrame({
-        'LinearRegression': get_relative_error(),
-        'Lasso': get_relative_error(),
-        'Ridge': get_relative_error(),
-        'ElasticNet': get_relative_error(),
-        'RandomForest': get_relative_error(),
+    relative_errors_df = pd.DataFrame({
+        'LinearRegression': get_relative_error(lr_pred, y_test),
+        'Lasso': get_relative_error(lasso_pred, y_test),
+        'Ridge': get_relative_error(ridge_pred, y_test),
+        'ElasticNet': get_relative_error(en_pred, y_test),
+        'RandomForest': get_relative_error(rf_pred, y_test),
     })
-    print(metrics_df.describe())
+    print(relative_errors_df.describe())
 
     print(separator)
     print('FEATURE IMPORTANCE')
