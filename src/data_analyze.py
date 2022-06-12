@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 
 separator = '=================================================================================================='
 
-features = ['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Tax', 'Trunk', 'Capacity', 'Acceleration', 'Clearance']
+features = ['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Tax', 'Trunk', 'Capacity', 'Acceleration', 'Clearance', 'PriceSegment']
 
 cars = get_data('autoru_learn.csv', 'raw')
 cars = cars[features].dropna()
@@ -59,14 +59,16 @@ def get_relative_error(prediction, y):
 
 def run():
     global cars
-    # cars = cars[cars['PriceSegment'] == 'ECONOMY']
+    cars = cars[(cars['PriceSegment'] == 'ECONOMY')]
+    # cars = cars[(cars['PriceSegment'] == 'MEDIUM') | (cars['PriceSegment'] == 'PREMIUM')]
+    cars = cars.drop(columns=['PriceSegment'])
     cars['Owners'] = cars['Owners'].astype(str)
 
     print(separator)
     print('CAT FEATURES ANALYZE')
     grid_place = 1
     plt.figure(figsize=(10, 20))
-    exclude_cat_features = ['City', 'Mark', 'Model', 'Pts', 'PriceSegment']
+    exclude_cat_features = ['City', 'Mark', 'Model', 'Pts']
     cat_features = [x for x in list(cars.select_dtypes(include=['object', 'bool']).columns) if x not in exclude_cat_features]
     for cat_feature in cat_features:
         build_cat_feature_plot(cat_feature, grid_place, len(cat_features))
@@ -199,6 +201,16 @@ def run():
     feature_importance = dict(zip(rf_model.feature_names_in_, rf_model.feature_importances_))
     for feature, value in dict(sorted(feature_importance.items(), key=lambda item: item[1])).items():
         print(f'{feature} -> {round(value, 2)}')
+
+    print(separator)
+    print('ERROR MODEL')
+    error_model = RandomForestRegressor(random_state=369)
+    error_model.fit(x_test, relative_errors_df['RandomForest'])
+    error_model_pred = error_model.predict(x_test)
+    error_metrics_df = pd.DataFrame({
+        'ErrorModel': get_metrics(error_model_pred, relative_errors_df['RandomForest']),
+    }, index=['R2', 'RMSE']).T
+    print(error_metrics_df)
     print(separator)
 
 
