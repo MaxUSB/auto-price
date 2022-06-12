@@ -12,11 +12,9 @@ class Predictor:
         self.features = self.config['features']
 
         self.model_e = None
-        self.model_m = None
-        self.model_p = None
+        self.model_m_and_p = None
         self.error_model_e = None
-        self.error_model_m = None
-        self.error_model_p = None
+        self.error_model_m_and_p = None
         self.custom_encode_dicts = {}
         self.segments = pd.DataFrame()
         self.cars = pd.DataFrame()
@@ -24,9 +22,9 @@ class Predictor:
     def __set_custom_field_encode_dicts(self, data):
         for field in [k for k, v in self.features.items() if v == 'custom']:
             if field == 'Mark':
-                self.custom_encode_dicts[field] = data.groupby('Mark')['Price'].mean()
+                self.custom_encode_dicts[field] = data.groupby('Mark')['Price'].median()
             elif field == 'Model':
-                self.custom_encode_dicts[field] = data.groupby('Model')['Price'].mean()
+                self.custom_encode_dicts[field] = data.groupby('Model')['Price'].median()
             elif field == 'City':
                 cities = data[['City']].drop_duplicates()
                 cities['CityID'] = cities['City'].astype('category')
@@ -53,28 +51,23 @@ class Predictor:
 
     def __segment_split(self, data):
         data_e = data[data['PriceSegment'] == 'ECONOMY'].drop(columns=['PriceSegment'])
-        data_m = data[data['PriceSegment'] == 'MEDIUM'].drop(columns=['PriceSegment'])
-        data_p = data[data['PriceSegment'] == 'PREMIUM'].drop(columns=['PriceSegment'])
+        data_m_and_p = data[data['PriceSegment'].isin('MEDIUM', 'PREMIUM')].drop(columns=['PriceSegment'])
         models_e = data_e['Model'].unique().tolist()
-        models_m = data_m['Model'].unique().tolist()
-        models_p = data_p['Model'].unique().tolist()
+        models_m_and_p = data_m_and_p['Model'].unique().tolist()
         self.segments = pd.concat([self.segments, pd.DataFrame({'Model': models_e, 'Segment': ['ECONOMY'] * len(models_e)})], ignore_index=True)
-        self.segments = pd.concat([self.segments, pd.DataFrame({'Model': models_m, 'Segment': ['MEDIUM'] * len(models_m)})], ignore_index=True)
-        self.segments = pd.concat([self.segments, pd.DataFrame({'Model': models_p, 'Segment': ['PREMIUM'] * len(models_p)})], ignore_index=True)
-        return data_e, data_m, data_p
+        self.segments = pd.concat([self.segments, pd.DataFrame({'Model': models_m_and_p, 'Segment': ['MEDIUM+PREMIUM'] * len(models_m_and_p)})], ignore_index=True)
+        return data_e, data_m_and_p
 
     def __get_segment_model(self, model):
         segment = self.segments[self.segments['Model'] == model]['Segment']
         if segment.empty:
-            return self.model_m, self.error_model_m
+            return self.model_m_and_p, self.error_model_m_and_p
         else:
             segment = segment.iloc[0]
         if segment == 'ECONOMY':
             return self.model_e, self.error_model_e
-        elif segment == 'MEDIUM':
-            return self.model_m, self.error_model_m
-        elif segment == 'PREMIUM':
-            return self.model_p, self.error_model_p
+        elif segment == 'MEDIUM+PREMIUM':
+            return self.model_m_and_p, self.error_model_m_and_p
 
     def fit(self, data):
         try:
@@ -84,46 +77,37 @@ class Predictor:
             self.__set_custom_field_encode_dicts(data)
             if self.v:
                 print('done.\nsplitting data by segment...', end=' ')
-            data_e, data_m, data_p = self.__segment_split(data)
+            data_e, data_m_and_p = self.__segment_split(data)
             if self.v:
                 print('done.\nencoding fields...', end=' ')
             data_e = self.__encode_fields(data_e.copy())
-            data_m = self.__encode_fields(data_m.copy())
-            data_p = self.__encode_fields(data_p.copy())
+            data_m_and_p = self.__encode_fields(data_m_and_p.copy())
             if self.v:
                 print('done.\ncreating training pools...', end=' ')
             x_e = data_e.drop(columns=self.target)
-            x_m = data_m.drop(columns=self.target)
-            x_p = data_p.drop(columns=self.target)
+            x_m_and_p = data_m_and_p.drop(columns=self.target)
             y_e = data_e[self.target]
-            y_m = data_m[self.target]
-            y_p = data_p[self.target]
+            y_m_and_p = data_m_and_p[self.target]
             if self.v:
                 print('done.\ncreating models...', end=' ')
             self.model_e = RandomForestRegressor(random_state=369)
-            self.model_m = RandomForestRegressor(random_state=369)
-            self.model_p = RandomForestRegressor(random_state=369)
+            self.model_m_and_p = RandomForestRegressor(random_state=369)
             if self.v:
                 print('done.\ntraining models...', end=' ')
             self.model_e.fit(x_e, y_e)
-            self.model_m.fit(x_m, y_m)
-            self.model_p.fit(x_p, y_p)
+            self.model_m_and_p.fit(x_m_and_p, y_m_and_p)
             if self.v:
                 print('done.\ncreating error models...', end=' ')
             error_df_e = pd.DataFrame({'real': y_e, 'predicted': self.model_e.predict(x_e)})
-            error_df_m = pd.DataFrame({'real': y_m, 'predicted': self.model_m.predict(x_m)})
-            error_df_p = pd.DataFrame({'real': y_p, 'predicted': self.model_p.predict(x_p)})
+            error_df_m_and_p = pd.DataFrame({'real': y_m_and_p, 'predicted': self.model_m_and_p.predict(x_m_and_p)})
             error_df_e['error'] = error_df_e.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
-            error_df_m['error'] = error_df_m.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
-            error_df_p['error'] = error_df_p.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
+            error_df_m_and_p['error'] = error_df_m_and_p.apply(lambda row: abs(row['real'] - row['predicted']) / row['real'], axis=1)
             self.error_model_e = RandomForestRegressor(random_state=369)
-            self.error_model_m = RandomForestRegressor(random_state=369)
-            self.error_model_p = RandomForestRegressor(random_state=369)
+            self.error_model_m_and_p = RandomForestRegressor(random_state=369)
             if self.v:
                 print('done.\ntraining error models...', end=' ')
             self.error_model_e.fit(x_e, error_df_e['error'])
-            self.error_model_m.fit(x_m, error_df_m['error'])
-            self.error_model_p.fit(x_p, error_df_p['error'])
+            self.error_model_m_and_p.fit(x_m_and_p, error_df_m_and_p['error'])
             if self.v:
                 print('done.')
             return True, None
@@ -167,11 +151,9 @@ class Predictor:
     def store_model(self):
         model_data = {
             'model_e': self.model_e,
-            'model_m': self.model_m,
-            'model_p': self.model_p,
+            'model_m_and_p': self.model_m_and_p,
             'error_model_e': self.error_model_e,
-            'error_model_m': self.error_model_m,
-            'error_model_p': self.error_model_p,
+            'error_model_m_and_p': self.error_model_m_and_p,
             'custom_encode_dicts': self.custom_encode_dicts,
             'segments': self.segments,
         }
@@ -182,11 +164,9 @@ class Predictor:
         if model_data is None:
             return False
         self.model_e = model_data['model_e']
-        self.model_m = model_data['model_m']
-        self.model_p = model_data['model_p']
+        self.model_m_and_p = model_data['model_m_and_p']
         self.error_model_e = model_data['error_model_e']
-        self.error_model_m = model_data['error_model_m']
-        self.error_model_p = model_data['error_model_p']
+        self.error_model_m_and_p = model_data['error_model_m_and_p']
         self.custom_encode_dicts = model_data['custom_encode_dicts']
         self.segments = model_data['segments']
         self.cars = get_data('autoru_learn.csv', 'raw')
