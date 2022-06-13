@@ -137,7 +137,7 @@ def run():
 
     print(separator)
     print('FINAL FEATURES')
-    final_features = ['Price', 'City', 'Mark', 'Model', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Clearance']
+    final_features = ['Price', 'City', 'Mark', 'Model', 'Owners', 'Year', 'Mileage', 'Horsepower']
     cars = cars[final_features]
     int_final_features = [feature for feature in final_features if feature not in ['Mark', 'Model']]
     cars[int_final_features] = cars[int_final_features].astype(int)
