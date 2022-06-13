@@ -16,9 +16,6 @@ class Parser:
 
         parsed_cars_df = pd.DataFrame()
         while start_price < end_price:
-            if self.v:
-                print(f'for price interval {start_price}...{start_price + increment}:')
-                print('getting page number...', end=' ')
             request_parameter = {
                 "category": "cars",
                 "section": "used",
@@ -33,7 +30,7 @@ class Parser:
                 continue
 
             if self.v:
-                print('done.\nparsing running:')
+                print(f'for price interval {start_price}...{start_price + increment} page parsing:')
             parsed_cars = []
             for page in range(1, total_pages + 1):
                 if self.v:
@@ -115,10 +112,6 @@ class Parser:
                         except:
                             car_dict['Trunk'] = None
                         try:
-                            car_dict['EngineVolume'] = car['vehicle_info']['tech_param']['displacement']
-                        except:
-                            car_dict['EngineVolume'] = None
-                        try:
                             car_dict['Acceleration'] = car['vehicle_info']['tech_param']['acceleration']
                         except:
                             car_dict['Acceleration'] = None
@@ -132,7 +125,7 @@ class Parser:
 
             if self.v:
                 print('done.\nsaving data...', end=' ')
-            parsed_cars_df = parsed_cars_df.append(parsed_cars)
+            parsed_cars_df = pd.concat([parsed_cars_df, parsed_cars])
             parsed_cars_df.drop(columns=['ID'], inplace=True)
             parsed_cars_df['Mark'] = parsed_cars_df['Mark'].apply(lambda x: 'LADA' if x == 'LADA (ВАЗ)' else x)
             success = save_data(parsed_cars_df, 'autoru_learn.csv', 'raw')
