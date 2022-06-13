@@ -59,7 +59,7 @@ def get_relative_error(prediction, y):
 
 def run():
     global cars
-    cars = cars[(cars['PriceSegment'] == 'ECONOMY')]
+    # cars = cars[(cars['PriceSegment'] == 'ECONOMY')]
     # cars = cars[(cars['PriceSegment'] == 'MEDIUM') | (cars['PriceSegment'] == 'PREMIUM')]
     cars = cars.drop(columns=['PriceSegment'])
     cars['Owners'] = cars['Owners'].astype(str)

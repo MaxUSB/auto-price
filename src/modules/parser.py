@@ -43,7 +43,6 @@ class Parser:
                 if response.status_code == 200:
                     cars = response.json().get('offers')
                     if cars is None:
-                        time.sleep(15)
                         continue
                     for car in cars:
                         car_dict = {}
