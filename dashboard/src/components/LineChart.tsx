@@ -55,7 +55,7 @@ const LineChart = (props: ILineChartProps) => {
                 },
                 label: (context) => {
                   const car = data[context['dataIndex']];
-                  return `Л.С.: ${car['Horsepower']}; Пробег: ${car['Mileage'].toLocaleString('ru-RU')} км; Владельцы: ${car['Owners']}; Клиренс: ${car['Clearance']}`;
+                  return `Л.С.: ${car['Horsepower']}; Пробег: ${car['Mileage'].toLocaleString('ru-RU')} км; Владельцы: ${car['Owners']}`;
                 },
                 footer: (context) => {
                   const car = data[context[0]['dataIndex']];

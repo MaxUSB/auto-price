@@ -54,7 +54,6 @@ interface ICatalogs {
   markList?: string[];
   modelList?: string[];
   horsepowerList?: string[];
-  clearanceList?: string[];
 }
 
 interface ICar {
@@ -65,7 +64,6 @@ interface ICar {
   owners?: number;
   mileage?: number;
   horsepower?: string;
-  clearance?: string;
 }
 
 interface IPredictState {
@@ -82,9 +80,9 @@ interface IPredictState {
 const Predict = () => {
   const classes = useStyles();
   const [state, setState] = useState<IPredictState>({
-    // car: { city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', clearance: '150', year: 2007, mileage: 240000, owners: 4 },
-    car: { city: 'Тюмень', mark: 'Chevrolet', model: 'Aveo', horsepower: '101', clearance: '155', year: 2011, mileage: 120000, owners: 2 },
-    // car: {},
+    // car: { city: 'Тюмень', mark: 'Honda', model: 'Accord', horsepower: '190', year: 2007, mileage: 240000, owners: 4 },
+    // car: { city: 'Тюмень', mark: 'Chevrolet', model: 'Aveo', horsepower: '101', year: 2011, mileage: 120000, owners: 2 },
+    car: {},
     catalogs: {},
     activeStep: 0,
     isLoading: false,
@@ -136,7 +134,6 @@ const Predict = () => {
     state.catalogs.markList || [],
     state.catalogs.modelList || [],
     state.catalogs.horsepowerList || [],
-    state.catalogs.clearanceList || [],
   );
 
   const handleChange = (item: string, value: any) => setState({ ...state, car: { ...state.car, [item]: value } });
