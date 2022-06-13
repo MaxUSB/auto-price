@@ -60,10 +60,6 @@ class CatalogFiller:
         if not success:
             print(f'error (catalog_filler): {error}', file=sys.stderr)
             return 1
-        success, clearance, error = self.__save_dependent_data_df(models, cars, 'Clearance', 'clearances')
-        if not success:
-            print(f'error (catalog_filler): {error}', file=sys.stderr)
-            return 1
         if self.v:
             print('done.')
 

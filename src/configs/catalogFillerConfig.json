@@ -49,24 +49,6 @@
           "target": "models"
         }
       ]
-    },
-    {
-      "name": "clearances",
-      "cols": {
-        "id": "serial primary key",
-        "clearance": "int",
-        "model_id": "int"
-      },
-      "constraint": [
-        "clearance",
-        "model_id"
-      ],
-      "foreign_keys": [
-        {
-          "col": "model_id",
-          "target": "models"
-        }
-      ]
     }
   ]
 }

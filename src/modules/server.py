@@ -28,9 +28,8 @@ class Server:
                 'marks': 'SELECT mark FROM marks',
                 'models': 'SELECT model FROM marks ma JOIN models mo on mo.mark_id = ma.id WHERE mark = :mark',
                 'model_params': '''
-                    SELECT horsepower, clearance FROM models m
+                    SELECT horsepower FROM models m
                     JOIN horsepower hp ON hp.model_id = m.id
-                    JOIN clearances cl ON cl.model_id = m.id
                     WHERE model = :model
                 ''',
             }
@@ -38,7 +37,7 @@ class Server:
                 'cities': ['city'],
                 'marks': ['mark'],
                 'models': ['model'],
-                'model_params': ['horsepower', 'clearance'],
+                'model_params': ['horsepower'],
             }
             return cls
 
