@@ -28,7 +28,9 @@ class Parser:
                 "geo_id": [225],
             }
             response = requests.post(url=self.url, json=request_parameter, headers=self.config['autoru_headers']).json()
-            total_pages = response['pagination']['total_page_count']
+            total_pages = response.get('pagination', {}).get('total_page_count')
+            if total_pages is None:
+                continue
 
             if self.v:
                 print('done.\nparsing running:')
@@ -143,6 +145,11 @@ class Parser:
 
         if parsed_cars_df.empty:
             print('error (parser): no car was parsed', file=sys.stderr)
+            return 1
+        parsed_cars_df = parsed_cars_df[['Price', 'Mark', 'City', 'Owners', 'Year', 'Mileage', 'Horsepower', 'Model', 'Pts', 'Transmission', 'FuelType', 'GearType', 'Tax','Trunk', 'Capacity', 'Acceleration', 'Clearance', 'PriceSegment']]
+        parsed_cars_df = parsed_cars_df.drop_duplicates()
+        success = save_data(parsed_cars_df, 'autoru_learn.csv', 'raw')
+        if not success:
             return 1
 
         return 0

@@ -115,7 +115,7 @@ def run():
     cars['Transmission'] = cars['Transmission'].apply(lambda x: 1 if x == 'MECHANICAL' else 0)
     cars['Pts'] = cars['Pts'].apply(lambda x: 1 if x == 'ORIGINAL' else 0)
     cars['FuelType'] = cars['FuelType'].apply(lambda x: 1 if x == 'GASOLINE' else 0)
-    cars['Owners'] = cars['Owners'].astype('int64')
+    cars['Owners'] = cars['Owners'].astype('float64').astype('int64')
     mark_median_prices = cars.groupby('Mark', as_index=False)['Price'].median()  # dict of Marks for predictor
     cars = cars.merge(mark_median_prices, how='left', on='Mark', suffixes=('', 'Mean')).drop(columns=['Mark']).rename(columns={'PriceMean': 'Mark'})
     model_median_prices = cars.groupby('Model', as_index=False)['Price'].median()  # dict of Models for predictor
