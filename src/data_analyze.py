@@ -194,7 +194,9 @@ def run():
         'ElasticNet': get_relative_error(en_pred, y_test),
         'RandomForest': get_relative_error(rf_pred, y_test),
     })
-    print(relative_errors_df.describe())
+    relative_errors_describe = relative_errors_df.describe()
+    relative_errors_describe.loc['count'] = relative_errors_describe.loc['count'].astype(int).astype(str)
+    print(relative_errors_describe)
 
     print(separator)
     print('FEATURE IMPORTANCE')
